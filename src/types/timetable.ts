@@ -19,11 +19,13 @@ export interface Lecture {
   roomsOnly: string;
   raw: string;
   rank?: number;
+  useRank?: boolean;
 }
 
 export interface Group {
   id: number;
   text: string;
+  useRank?: boolean; // 우선순위 점수 적용 여부
 }
 
 export interface ProfWeight {

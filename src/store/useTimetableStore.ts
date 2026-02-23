@@ -27,6 +27,7 @@ interface TimetableState {
   resetAll: () => void;
   setAllTableMode: (isTable: boolean) => void;
   toggleTableMode: (id: number) => void;
+  toggleGroupRank: (id: number) => void;
 }
 
 const defaultSettings: Settings = {
@@ -46,15 +47,15 @@ const defaultSettings: Settings = {
     { name: "", weight: 40 },
     { name: "", weight: 20 },
   ],
-  university: 'catholic', // 기본 대학: 가톨릭대
+  university: 'catholic', 
 };
 
 export const useTimetableStore = create<TimetableState>()(
   persist(
     (set, get) => ({
       groups: [
-        { id: 1, text: "" }, { id: 2, text: "" }, { id: 3, text: "" },
-        { id: 4, text: "" }, { id: 5, text: "" }, { id: 6, text: "" },
+        { id: 1, text: "", useRank: true }, { id: 2, text: "", useRank: true }, { id: 3, text: "", useRank: true },
+        { id: 4, text: "", useRank: true }, { id: 5, text: "", useRank: true }, { id: 6, text: "", useRank: true },
       ],
       settings: defaultSettings,
       excludedLectureKeys: new Set<string>(),
@@ -67,7 +68,7 @@ export const useTimetableStore = create<TimetableState>()(
 
       addGroup: () =>
         set((state) => ({
-          groups: [...state.groups, { id: state.groups.length + 1, text: "" }],
+          groups: [...state.groups, { id: state.groups.length + 1, text: "", useRank: true }],
         })),
 
       removeGroup: (id) =>
@@ -87,14 +88,13 @@ export const useTimetableStore = create<TimetableState>()(
           const group = state.groups.find((g) => g.id === id);
           if (!group) return {};
 
-          const parsedCourses = parseText(group.text, id);
+          const parsedCourses = parseText(group.text, id, state.settings.university, group.useRank ?? true);
           if (!parsedCourses || parsedCourses.length === 0) return {};
 
           const newCourses = [...parsedCourses];
           const [moved] = newCourses.splice(fromIndex, 1);
           newCourses.splice(toIndex, 0, moved);
 
-          // 순서가 변경된 강의들의 raw 텍스트를 다시 합쳐서 저장
           const newText = newCourses.map(c => c.raw).join("\n");
           
           return {
@@ -112,21 +112,12 @@ export const useTimetableStore = create<TimetableState>()(
           
           for (let i = 1; i <= finalCount; i++) {
             const existingGroup = state.groups.find(g => g.id === i);
-            const newText = texts[i - 1]; // 해당 인덱스에 새 텍스트가 있는지 확인
+            const newText = texts[i - 1]; 
 
             newGroups.push({
               id: i,
-              // 새 텍스트가 있으면(빈 문자열이 아니면) 덮어쓰고, 없으면 기존 텍스트 유지
-              // 단, '모든 그룹에 자동 배분' 기능의 취지가 '전체 덮어쓰기'라면 기존 로직이 맞을 수 있음.
-              // 하지만 사용자는 "그룹 7이 추가되면서 다른 거에는 안 넣어지는" 상황을 문제로 지적함.
-              // 즉, texts 배열이 [t1, t2, ..., t7] 형태로 들어오는데,
-              // 만약 texts가 [undefined, undefined, ..., t7] 처럼 희소 배열(sparse array)로 들어오는 경우를 대비해야 함.
-              // splitBulkText는 순차 배열을 반환하므로, texts[0]은 그룹1, texts[1]은 그룹2... 로 매핑됨.
-              // 사용자의 의도는 "그룹 1~6에 데이터가 있는데, 텍스트 뭉치에 그룹 7 데이터가 있어서 그룹 7이 생성되었을 때,
-              // 그룹 1~6의 데이터도 텍스트 뭉치에 있는 대로 잘 들어가야 한다"는 것.
-              
-              // 만약 `texts` 배열이 전체 데이터를 다 가지고 있다면:
               text: newText !== undefined ? newText : (existingGroup ? existingGroup.text : ""),
+              useRank: existingGroup ? (existingGroup.useRank ?? true) : true,
             });
           }
           return { groups: newGroups, hasRun: false };
@@ -156,7 +147,7 @@ export const useTimetableStore = create<TimetableState>()(
               .map((g) => ({
                 id: g.id,
                 text: g.text,
-                courses: parseText(g.text, g.id, settings.university),
+                courses: parseText(g.text, g.id, settings.university, g.useRank ?? true),
               }))
               .filter((g) => g.courses.length > 0 || g.text.trim().length > 0);
 
@@ -178,8 +169,8 @@ export const useTimetableStore = create<TimetableState>()(
       resetAll: () => {
         set({
           groups: [
-            { id: 1, text: "" }, { id: 2, text: "" }, { id: 3, text: "" },
-            { id: 4, text: "" }, { id: 5, text: "" }, { id: 6, text: "" },
+            { id: 1, text: "", useRank: true }, { id: 2, text: "", useRank: true }, { id: 3, text: "", useRank: true },
+            { id: 4, text: "", useRank: true }, { id: 5, text: "", useRank: true }, { id: 6, text: "", useRank: true },
           ],
           settings: defaultSettings,
           excludedLectureKeys: new Set(),
@@ -203,6 +194,14 @@ export const useTimetableStore = create<TimetableState>()(
           if (newSet.has(id)) newSet.delete(id); else newSet.add(id);
           return { tableModeGroups: newSet };
         }),
+
+      toggleGroupRank: (id) =>
+        set((state) => ({
+          groups: state.groups.map((g) => 
+            g.id === id ? { ...g, useRank: !(g.useRank ?? true) } : g
+          ),
+          hasRun: false
+        })),
     }),
     {
       name: "timetable-storage",

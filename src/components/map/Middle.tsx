@@ -81,7 +81,8 @@ const Middle: React.FC = () => {
   const { 
     groups, updateGroupText, reorderGroupText, 
     excludedLectureKeys, toggleExcludeLecture, 
-    tableModeGroups, toggleTableMode, settings 
+    tableModeGroups, toggleTableMode, settings,
+    toggleGroupRank
   } = useTimetableStore();
 
   const sensors = useSensors(
@@ -118,7 +119,18 @@ const Middle: React.FC = () => {
         return (
           <div key={group.id} className="group" id={`group-box-${group.id}`}>
             <div className="group-header">
-              <h3>그룹 {group.id} <span style={{fontSize: '12px', fontWeight: 'normal', color: '#888', marginLeft: '8px'}}>(드래그하여 우선순위 변경)</span></h3>
+              <div className="flex items-center gap-3">
+                <h3>그룹 {group.id} <span style={{fontSize: '12px', fontWeight: 'normal', color: '#888'}}>(드래그하여 우선순위 변경)</span></h3>
+                <label className="flex items-center gap-1 cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={group.useRank ?? true} 
+                    onChange={() => toggleGroupRank(group.id)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-[11px] font-bold text-gray-500">우선순위 적용</span>
+                </label>
+              </div>
               <div className="header-btns">
                 <button className="convert-btn" onClick={() => toggleTableMode(group.id)}>
                   {isTable ? "텍스트 수정" : "리스트 보기"}

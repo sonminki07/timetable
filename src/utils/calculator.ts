@@ -68,7 +68,7 @@ export function calculateScore(
     }
 
     // 우선순위(Rank) 기반 가점 (기존 선호 교수님 가점 대체)
-    if (settings.useProfWeight && c.rank !== undefined && settings.profWeights[c.rank]) {
+    if (settings.useProfWeight && c.rank !== undefined && settings.profWeights[c.rank] && c.useRank !== false) {
       const weight = settings.profWeights[c.rank].weight;
       if (weight > 0) {
         score += weight;

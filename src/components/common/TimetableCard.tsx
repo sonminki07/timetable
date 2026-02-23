@@ -121,7 +121,14 @@ export default function TimetableCard({ schedule, index }: TimetableCardProps) {
               </div>
               
               {block.lecture.prof && (
-                <div className="tt-block-prof">{block.lecture.prof}</div>
+                <div className="tt-block-prof">
+                  {block.lecture.prof}
+                  {block.lecture.rank !== undefined && (
+                    <span style={{ fontSize: '8px', fontWeight: 'normal', color: '#666', marginLeft: '2px' }}>
+                      ({block.lecture.rank + 1})
+                    </span>
+                  )}
+                </div>
               )}
               
               <div className="tt-block-room">{block.room || ''}</div>

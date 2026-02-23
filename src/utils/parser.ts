@@ -2,7 +2,7 @@ import { Lecture, TimeBlock } from "../types/timetable";
 
 export const DAYS = ["월", "화", "수", "목", "금"];
 
-export function parseText(text: string, groupIdx: number, university: string = 'catholic'): Lecture[] {
+export function parseText(text: string, groupIdx: number, university: string = 'catholic', useRank: boolean = true): Lecture[] {
   if (!text.trim()) return [];
   const lines = text.split("\n");
   const courses: Lecture[] = [];
@@ -154,6 +154,7 @@ export function parseText(text: string, groupIdx: number, university: string = '
         roomsOnly: university === 'hanshin' ? roomStr : [...new Set(timeBlocks.map((tb) => tb.room).filter((r) => r))].join(", "),
         groupIdx,
         rank: courses.length,
+        useRank, // 우선순위 적용 여부
       });
     }
   }
