@@ -42,6 +42,7 @@ export interface Settings {
   prefLunch: number[];
   useProfWeight: boolean;
   profWeights: ProfWeight[];
+  university?: 'catholic' | 'hanshin'; // 기본값: 'catholic'
 }
 
 export interface Schedule {

@@ -33,8 +33,23 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
         <h2 className="flex items-center gap-2">
           ⚙️ 환경 설정
         </h2>
-        
+
         <div className="sidebar-item">
+          <p className="font-bold mb-3">학교 선택</p>
+          <select 
+            className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
+            value={useTimetableStore(state => state.settings.university || 'catholic')}
+            onChange={(e) => useTimetableStore.getState().updateSettings({ university: e.target.value as 'catholic' | 'hanshin' })}
+          >
+            <option value="catholic">가톨릭대학교 (기본)</option>
+            <option value="hanshin">한신대학교</option>
+          </select>
+          <p className="text-[11px] text-gray-400 mt-2">
+            * 학교를 변경하면 입력된 텍스트 파싱 방식이 달라집니다.
+          </p>
+        </div>
+        
+        <div className="sidebar-item border-t border-gray-100 dark:border-gray-700 pt-5 mt-5">
           <p className="font-bold mb-3">테마 설정</p>
           <button 
             className={`sidebar-btn-primary ${theme === 'light' ? 'theme-btn-light' : 'theme-btn-dark'}`}

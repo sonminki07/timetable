@@ -81,7 +81,7 @@ const Middle: React.FC = () => {
   const { 
     groups, updateGroupText, reorderGroupText, 
     excludedLectureKeys, toggleExcludeLecture, 
-    tableModeGroups, toggleTableMode 
+    tableModeGroups, toggleTableMode, settings 
   } = useTimetableStore();
 
   const sensors = useSensors(
@@ -111,7 +111,7 @@ const Middle: React.FC = () => {
     <div id="groups-container">
       {groups.map((group) => {
         const isTable = tableModeGroups.has(group.id);
-        const parsed = parseText(group.text, group.id);
+        const parsed = parseText(group.text, group.id, settings.university);
         // 각 항목에 고유 ID 부여 (인덱스 활용)
         const items = parsed.map((c, idx) => `item-${group.id}-${idx}`);
 

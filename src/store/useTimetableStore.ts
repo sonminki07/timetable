@@ -46,6 +46,7 @@ const defaultSettings: Settings = {
     { name: "", weight: 40 },
     { name: "", weight: 20 },
   ],
+  university: 'catholic', // 기본 대학: 가톨릭대
 };
 
 export const useTimetableStore = create<TimetableState>()(
@@ -142,7 +143,7 @@ export const useTimetableStore = create<TimetableState>()(
               .map((g) => ({
                 id: g.id,
                 text: g.text,
-                courses: parseText(g.text, g.id),
+                courses: parseText(g.text, g.id, settings.university),
               }))
               .filter((g) => g.courses.length > 0 || g.text.trim().length > 0);
 
