@@ -135,10 +135,10 @@ export function calculateScore(
   }
 
   // 연강 제한 감점
-  if (maxConsecutiveTotal > settings.maxConsec) {
+  if (maxConsecutiveTotal >= settings.maxConsec) {
     const penalty = 50 + (maxConsecutiveTotal - settings.maxConsec) * 10;
     score -= penalty;
-    details.push(`${settings.maxConsec}연강초과(-${penalty})`);
+    details.push(`${settings.maxConsec}연강(-${penalty})`);
   }
 
   return {

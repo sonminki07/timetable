@@ -98,8 +98,8 @@ const Bottom: React.FC = () => {
         <div className="option-row">
           <label className="title">🏃 연강 제한 설정</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px' }}>
-            <input type="number" style={{ width: '50px' }} value={settings.maxConsec || ''} onChange={(e) => updateSettings({ maxConsec: parseInt(e.target.value) || 0 })} />
-            <span>시간 초과 시</span>
+            <input type="number" style={{ width: '40px' }} value={settings.maxConsec || ''} onChange={(e) => updateSettings({ maxConsec: parseInt(e.target.value) || 0 })} />
+            <span>시간 이상 연속</span>
             <select 
               value={settings.consecPolicy} 
               onChange={(e) => updateSettings({ consecPolicy: e.target.value as 'penalty' | 'destroy' })}

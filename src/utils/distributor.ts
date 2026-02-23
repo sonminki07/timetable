@@ -21,5 +21,5 @@ export function splitBulkText(text: string): string[] {
       .filter((item) => item.length > 0);
   }
 
-  return groupData.slice(0, 10);
+  return groupData.slice(0, 50);
 }

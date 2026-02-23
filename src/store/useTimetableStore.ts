@@ -106,7 +106,7 @@ export const useTimetableStore = create<TimetableState>()(
       setBulkGroups: (texts) => {
         set((state) => {
           const maxCount = Math.max(state.groups.length, texts.length);
-          const finalCount = Math.min(maxCount, 10);
+          const finalCount = Math.min(maxCount, 50);
           const newGroups: Group[] = [];
           
           for (let i = 1; i <= finalCount; i++) {
