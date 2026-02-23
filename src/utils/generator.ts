@@ -21,11 +21,15 @@ export function generateSchedules(
       const key = `${g.id}|${c.title}|${c.prof}|${c.timesOnly}`;
       if (excludedLectureKeys.has(key)) return false;
 
-      // 특정 교시 제외 필터
+      // 특정 교시 제외 필터 (인덱스 기반)
       if (settings.excludePeriods.length > 0) {
         const isExcluded = c.timeBlocks.some((tb: TimeBlock) => {
-          for (let h = tb.start; h <= tb.end; h++) {
-            if (settings.excludePeriods.includes(h)) return true;
+          // tb.start ~ tb.end (인덱스)
+          for (const p of settings.excludePeriods) {
+            const pStart = (p - 1) * 4;
+            const pEnd = p * 4 - 1;
+            // 범위 교차 확인: (StartA <= EndB) && (EndA >= StartB)
+            if (tb.start <= pEnd && tb.end >= pStart) return true;
           }
           return false;
         });
@@ -68,7 +72,8 @@ export function generateSchedules(
         const { score, text, maxConsecutiveTotal } = calculateScore(currentLectures, settings);
         
         // 🚀 연강 정책에 따른 필터링 (파괴 선택 시에만 제외)
-        if (settings.consecPolicy === 'destroy' && maxConsecutiveTotal > settings.maxConsec) return;
+        // 15분 단위(칸 수)로 비교
+        if (settings.consecPolicy === 'destroy' && maxConsecutiveTotal >= settings.maxConsec * 4) return;
 
         // 🚀 이동 정보 미리 계산하여 렌더링 렉 방지
         const enrichedLectures = currentLectures.map(l => ({

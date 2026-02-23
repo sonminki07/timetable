@@ -78,7 +78,8 @@ export function calculateScore(
 
     c.timeBlocks.forEach((tb: TimeBlock) => {
       dayCount[tb.day]++;
-      if (tb.start === 1) hasClass1 = true;
+      // 1교시(09:00~10:00) 포함 여부 (인덱스 0~3)
+      if (tb.start < 4) hasClass1 = true;
       for (let i = tb.start; i <= tb.end; i++) dayHours[tb.day].push(i);
     });
   });
@@ -90,7 +91,17 @@ export function calculateScore(
     for (const d of DAYS) {
       if (dayCount[d] > 0) {
         hasAnyClass = true;
-        const canEatToday = settings.prefLunch.some((p: number) => !dayHours[d].includes(p));
+        // 점심 교시를 인덱스 범위로 변환하여 확인
+        const canEatToday = settings.prefLunch.some((p: number) => {
+           // p교시 -> (p-1)*4 ~ p*4-1
+           const startIdx = (p - 1) * 4;
+           const endIdx = p * 4 - 1;
+           // 해당 범위 내에 수업이 하나라도 있으면 식사 불가
+           for (let i = startIdx; i <= endIdx; i++) {
+             if (dayHours[d].includes(i)) return false;
+           }
+           return true;
+        });
         if (!canEatToday) lunchGuaranteedAllDays = false;
       }
     }
@@ -120,7 +131,7 @@ export function calculateScore(
     } else {
       const hours = dayHours[d].sort((a, b) => a - b);
       let consecutive = 1;
-      let maxConsecToday = 1;
+      let maxConsecToday = 1; // 칸 수 (15분 단위)
       for (let i = 1; i < hours.length; i++) {
         if (hours[i] === hours[i - 1] + 1) {
           consecutive++;
@@ -134,9 +145,10 @@ export function calculateScore(
     }
   }
 
-  // 연강 제한 감점
-  if (maxConsecutiveTotal >= settings.maxConsec) {
-    const penalty = 50 + (maxConsecutiveTotal - settings.maxConsec) * 10;
+  // 연강 제한 감점 (설정값은 시간 단위, maxConsecutiveTotal은 15분 단위)
+  // settings.maxConsec * 4 와 비교
+  if (maxConsecutiveTotal >= settings.maxConsec * 4) {
+    const penalty = 50 + (maxConsecutiveTotal - settings.maxConsec * 4) * 5; // 페널티 조정
     score -= penalty;
     details.push(`${settings.maxConsec}연강(-${penalty})`);
   }

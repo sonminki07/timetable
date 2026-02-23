@@ -13,18 +13,11 @@ export function parseText(text: string, groupIdx: number, university: string = '
   // 한신대 시간 파싱 (예: 화(13:00~14:15))
   const hanshinTimeRegex = /(월|화|수|목|금)\((\d{2}:\d{2})~(\d{2}:\d{2})\)/g;
 
-  // 한신대 시간 -> 교시 매핑 (근사치)
-  function mapTimeToPeriod(timeStr: string): number {
-    const hour = parseInt(timeStr.split(':')[0]);
-    if (hour < 10) return 1; 
-    if (hour < 11) return 2; 
-    if (hour < 12) return 3; 
-    if (hour < 13) return 4; 
-    if (hour < 14) return 5; 
-    if (hour < 15) return 6; 
-    if (hour < 16) return 7; 
-    if (hour < 17) return 8; 
-    return 9;
+  // 15분 단위 인덱스 변환 (09:00 = 0)
+  function mapTimeToIndex(timeStr: string): number {
+    const [h, m] = timeStr.split(':').map(Number);
+    const totalMin = (h - 9) * 60 + m; // 9시 기준 경과 분
+    return Math.floor(totalMin / 15);
   }
 
   for (const line of lines) {
@@ -114,13 +107,15 @@ export function parseText(text: string, groupIdx: number, university: string = '
         const startStr = match[2]; 
         const endStr = match[3];   
         
-        const start = mapTimeToPeriod(startStr);
-        const end = start; 
+        // 15분 단위 인덱스로 변환
+        const start = mapTimeToIndex(startStr);
+        let end = mapTimeToIndex(endStr);
+        if (end > start) end -= 1; // 종료 시간 직전 칸까지만 포함
 
         const room = roomStr || ""; 
 
         timeBlocks.push({ day, start, end, room });
-        timeStrArray.push(`${day}${start} (${startStr}~${endStr})`);
+        timeStrArray.push(`${day} ${startStr}~${endStr}`);
         
         for (let i = start; i <= end; i++) {
           allTimes.push(day + i);
@@ -131,12 +126,16 @@ export function parseText(text: string, groupIdx: number, university: string = '
         timeRegex.lastIndex = 0; 
         while ((match = timeRegex.exec(line)) !== null) {
           const day = match[1];
-          const start = parseInt(match[2]);
-          const end = match[3] ? parseInt(match[3]) : start;
+          const startPeriod = parseInt(match[2]);
+          const endPeriod = match[3] ? parseInt(match[3]) : startPeriod;
           const room = match[4] || "";
           
+          // 1교시(1) -> 09:00(0) ~ 09:45(3) (4칸 차지)
+          const start = (startPeriod - 1) * 4;
+          const end = (endPeriod * 4) - 1;
+
           timeBlocks.push({ day, start, end, room });
-          timeStrArray.push(`${day}${start}${end !== start ? "~" + end : ""}`);
+          timeStrArray.push(`${day}${startPeriod}${endPeriod !== startPeriod ? "~" + endPeriod : ""}`);
           
           for (let i = start; i <= end; i++) {
             allTimes.push(day + i);
