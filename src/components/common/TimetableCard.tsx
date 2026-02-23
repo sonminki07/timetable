@@ -40,7 +40,7 @@ export default function TimetableCard({ schedule, index }: TimetableCardProps) {
       <div className="timetable" style={{
         display: 'grid',
         gridTemplateColumns: '30px repeat(5, 1fr)',
-        gridTemplateRows: '25px repeat(52, 1fr)', // 13시간 * 4 = 52칸
+        gridTemplateRows: '25px repeat(52, 11px)', // 15분 단위 높이 축소
         backgroundColor: 'var(--grid-bg)', // 기존 배경색 사용
         gap: '1px',
         border: '1px solid var(--grid-bg)',
