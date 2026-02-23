@@ -129,7 +129,8 @@ export function calculateScore(
       }
       details.push(dayText);
     } else {
-      const hours = dayHours[d].sort((a, b) => a - b);
+      // 중복 제거 후 정렬 (겹치는 수업이나 데이터 오류로 인한 중복 방지)
+      const hours = [...new Set(dayHours[d])].sort((a, b) => a - b);
       let consecutive = 1;
       let maxConsecToday = 1; // 칸 수 (15분 단위)
       for (let i = 1; i < hours.length; i++) {
