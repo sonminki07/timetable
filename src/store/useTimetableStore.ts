@@ -111,9 +111,22 @@ export const useTimetableStore = create<TimetableState>()(
           const newGroups: Group[] = [];
           
           for (let i = 1; i <= finalCount; i++) {
+            const existingGroup = state.groups.find(g => g.id === i);
+            const newText = texts[i - 1]; // 해당 인덱스에 새 텍스트가 있는지 확인
+
             newGroups.push({
               id: i,
-              text: texts[i - 1] || "",
+              // 새 텍스트가 있으면(빈 문자열이 아니면) 덮어쓰고, 없으면 기존 텍스트 유지
+              // 단, '모든 그룹에 자동 배분' 기능의 취지가 '전체 덮어쓰기'라면 기존 로직이 맞을 수 있음.
+              // 하지만 사용자는 "그룹 7이 추가되면서 다른 거에는 안 넣어지는" 상황을 문제로 지적함.
+              // 즉, texts 배열이 [t1, t2, ..., t7] 형태로 들어오는데,
+              // 만약 texts가 [undefined, undefined, ..., t7] 처럼 희소 배열(sparse array)로 들어오는 경우를 대비해야 함.
+              // splitBulkText는 순차 배열을 반환하므로, texts[0]은 그룹1, texts[1]은 그룹2... 로 매핑됨.
+              // 사용자의 의도는 "그룹 1~6에 데이터가 있는데, 텍스트 뭉치에 그룹 7 데이터가 있어서 그룹 7이 생성되었을 때,
+              // 그룹 1~6의 데이터도 텍스트 뭉치에 있는 대로 잘 들어가야 한다"는 것.
+              
+              // 만약 `texts` 배열이 전체 데이터를 다 가지고 있다면:
+              text: newText !== undefined ? newText : (existingGroup ? existingGroup.text : ""),
             });
           }
           return { groups: newGroups, hasRun: false };

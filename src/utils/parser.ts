@@ -32,8 +32,7 @@ export function parseText(text: string, groupIdx: number, university: string = '
       !line.trim() ||
       line.includes("강의코드") ||
       line.includes("강의명") ||
-      line.includes("교수") ||
-      line.includes("과목 삭제")
+      line.includes("교수")
     )
       continue;
 
