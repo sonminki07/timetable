@@ -41,11 +41,13 @@ export default function TimetableCard({ schedule, index }: TimetableCardProps) {
         display: 'grid',
         gridTemplateColumns: '30px repeat(5, 1fr)',
         gridTemplateRows: '25px repeat(52, 1fr)', // 13시간 * 4 = 52칸 (09:00 ~ 22:00)
-        border: '1px solid #ddd',
-        backgroundColor: '#fff',
-        height: '600px', // 전체 높이 고정 (스크롤 가능하게)
-        overflowY: 'auto',
-        fontSize: '11px'
+        border: '1px solid var(--border)',
+        backgroundColor: 'var(--bg-card)', // 다크 모드 배경색 적용
+        // height: '600px', // 고정 높이 제거 -> 전체 표시
+        minHeight: '400px',
+        // overflowY: 'auto', // 스크롤 제거
+        fontSize: '11px',
+        color: 'var(--text-primary)' // 다크 모드 텍스트 색상
       }}>
         {/* 1. 요일 헤더 */}
         <div className="tt-cell tt-header" style={{ gridColumn: 1, gridRow: 1, borderRight: '1px solid #eee', borderBottom: '1px solid #ddd' }} />
