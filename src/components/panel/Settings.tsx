@@ -8,7 +8,7 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
-  const { resetAll } = useTimetableStore();
+  const { resetAll, settings, updateSettings } = useTimetableStore();
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
@@ -38,8 +38,8 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
           <p className="font-bold mb-3">학교 선택</p>
           <select 
             className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
-            value={useTimetableStore(state => state.settings.university || 'catholic')}
-            onChange={(e) => useTimetableStore.getState().updateSettings({ university: e.target.value as 'catholic' | 'hanshin' })}
+            value={settings.university || 'catholic'}
+            onChange={(e) => updateSettings({ university: e.target.value as 'catholic' | 'hanshin' })}
           >
             <option value="catholic">가톨릭대학교 (기본)</option>
             <option value="hanshin">한신대학교</option>
