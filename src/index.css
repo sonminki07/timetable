@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 * { box-sizing: border-box; }
 
 :root { 
@@ -126,6 +136,7 @@ table.group-table td.room-col { font-weight: bold; color: var(--text-blue); }
 
 /* 동적 크기 조절 그리드 */
 #result-container { display: grid; gap: 20px; width: 100%; }
+.timetable-grid { grid-template-columns: repeat(var(--dynamic-cols, 3), 1fr); gap: 1rem; }
 
 /* 시간표 래퍼 */
 .timetable-wrapper { background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; width: 100%; }
@@ -136,7 +147,7 @@ table.group-table td.room-col { font-weight: bold; color: var(--text-blue); }
 .timetable { 
   display: grid; 
   grid-template-columns: 35px repeat(5, 1fr); 
-  grid-template-rows: 25px repeat(10, 45px);
+  grid-template-rows: 25px repeat(10, 25px); /* 교시 높이를 25px로 대폭 축소 (납작하게) */
   background: var(--grid-bg); gap: 1px; border: 1px solid var(--grid-bg); position: relative;
   border-radius: 0 0 12px 12px; overflow: hidden;
 }
@@ -145,8 +156,8 @@ table.group-table td.room-col { font-weight: bold; color: var(--text-blue); }
 .tt-time { background: var(--cell-header); font-weight: bold; color: var(--text-gray); }
 
 .tt-block { 
-  z-index: 10; border-radius: 4px; padding: 4px 5px; font-size: 10px; color: #333; 
-  overflow: hidden; display: flex; flex-direction: column; line-height: 1.2;
+  z-index: 10; border-radius: 4px; padding: 2px 4px; font-size: 9px; color: #333; 
+  overflow: hidden; display: flex; flex-direction: column; line-height: 1.1;
   margin: 1px; width: calc(100% - 2px); height: calc(100% - 2px);
   cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
   align-self: start; 
@@ -155,7 +166,7 @@ table.group-table td.room-col { font-weight: bold; color: var(--text-blue); }
 
 .tt-block.can-hover:hover {
   height: max-content !important; 
-  min-height: calc(100% + 45px) !important; 
+  min-height: calc(100% + 25px) !important; 
   z-index: 999 !important; 
   overflow: visible !important; 
   box-shadow: 0 10px 25px rgba(0,0,0,0.3);
@@ -163,10 +174,10 @@ table.group-table td.room-col { font-weight: bold; color: var(--text-blue); }
   border: 1px solid #95a5a6;
 }
 
-.tt-block-title { font-weight: bold; margin-bottom: 2px; word-break: break-all; color: #000; }
-.group-badge { background: rgba(0,0,0,0.1); color: #333; padding: 1px 3px; border-radius: 3px; font-size: 8px; margin-right: 3px; font-weight: 900; }
-.tt-block-room { font-size: 9px; opacity: 0.9; margin-top: auto; letter-spacing: -0.5px; }
-.tt-block-prof { font-size: 9px; opacity: 0.8; color: #c0392b; font-weight: bold; margin-bottom: 2px; }
+.tt-block-title { font-weight: bold; margin-bottom: 1px; word-break: break-all; color: #000; }
+.group-badge { background: rgba(0,0,0,0.1); color: #333; padding: 1px 2px; border-radius: 2px; font-size: 7px; margin-right: 2px; font-weight: 900; }
+.tt-block-room { font-size: 8px; opacity: 0.9; margin-top: auto; letter-spacing: -0.5px; }
+.tt-block-prof { font-size: 8px; opacity: 0.8; color: #c0392b; font-weight: bold; margin-bottom: 1px; }
 
 /* ⚙️ 사이드바 스타일 */
 .sidebar {
@@ -200,7 +211,64 @@ table.group-table td.room-col { font-weight: bold; color: var(--text-blue); }
 .analog-fade.loaded { opacity: 1; filter: blur(0); }
 
 @media (max-width: 768px) {
-  .group { width: calc((100% - 16px) / 2); min-width: 0; }
-  .group-controls-container { flex-direction: column; }
+  .group { width: calc((100% - 15px) / 2); min-width: 0; }
+  .group-controls-container { flex-direction: column; gap: 15px; }
   .bulk-textarea { width: 100%; }
+  .control-right-bulk { width: 100%; align-items: stretch; }
+}
+
+/* 📱 모바일 최적화 (640px 이하) */
+@media (max-width: 640px) {
+  .main-container { padding: 15px 12px; }
+  
+  /* 헤더 영역 조정 */
+  .header-wrapper { flex-direction: row; align-items: flex-start; gap: 8px; justify-content: space-between; }
+  .header-right-tools { width: auto; justify-content: flex-end; }
+  .settings-btn { font-size: 18px; padding: 4px 6px; }
+  h1 { font-size: 18px; } /* 모바일에서 제목도 살짝 줄임 */
+
+  /* 그룹 입력을 1열로 (Full Width) */
+  #groups-container { gap: 12px; }
+  .group { width: 100% !important; margin-bottom: 5px; }
+  .group-input { height: 120px; font-size: 14px; } /* 모바일에서 가독성 확보 */
+
+  /* 하단 필터/컨트롤 영역 */
+  .controls { padding: 15px; border-left: none; border-top: 4px solid #27ae60; }
+  .option-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .option-row label.title { width: 100%; font-size: 13px; }
+  .option-row input[type="text"], .option-row input[type="number"] { width: 100%; padding: 8px; }
+
+  /* 실행 버튼 강조 */
+  .main-btns { flex-direction: column; gap: 10px; }
+  .run-btn { padding: 16px; font-size: 18px; order: -1; } /* 실행 버튼을 위로 */
+  .reset-results-btn { padding: 12px; }
+
+  .timetable-grid { grid-template-columns: 1fr !important; }
+
+  /* 📊 시간표 결과 영역 가로 스크롤 허용 해제 및 화면 맞춤 */
+  .timetable-wrapper { 
+    margin-bottom: 25px; 
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .timetable-header { padding: 12px; }
+  .timetable { 
+    width: 100%;
+    grid-template-columns: 24px repeat(5, 1fr); /* 모바일: 시간열 축소 */
+    grid-template-rows: 20px repeat(10, 22px); /* 모바일: 세로 높이 극단적으로 축소 (납작하게) */
+  }
+  
+  /* 모바일 시간표 내부 텍스트 크기 조정 */
+  .tt-cell { font-size: 10px; }
+  .tt-block { padding: 2px 3px; }
+  .tt-block-title { font-size: 9px; margin-bottom: 1px; line-height: 1.1; }
+  .tt-block-room { font-size: 8px; letter-spacing: -0.5px; }
+  .tt-block-prof { font-size: 8px; margin-bottom: 1px; }
+  .group-badge { font-size: 7px; padding: 1px 2px; }
+
+  /* 사이드바 너비 */
+  .sidebar { width: 85%; max-width: 320px; }
+
+  /* 하단 여백 추가 (스크롤 편의성) */
+  #result-container { padding-bottom: 60px; }
 }

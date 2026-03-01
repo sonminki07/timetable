@@ -16,6 +16,14 @@ const Bottom: React.FC = () => {
 
   const [isResultExpanded, setIsResultExpanded] = useState(false);
   const [isProfWeightExpanded, setIsProfWeightExpanded] = useState(false);
+  const [isSettingsExpanded, setIsSettingsExpanded] = useState(false);
+
+  useEffect(() => {
+    // 초기 로드 시 화면 크기가 PC(640px 초과)이면 설정 창을 열어둠
+    if (window.innerWidth > 640) {
+      setIsSettingsExpanded(true);
+    }
+  }, []);
 
   // 결과가 생성되면 자동으로 확장 애니메이션 트리거
   useEffect(() => {
@@ -46,7 +54,19 @@ const Bottom: React.FC = () => {
   return (
     <div className="bottom-container">
       <div className="controls">
-        <h3>⚙️ 맞춤형 추천도(가점/감점) 및 필터 설정</h3>
+        <div 
+          className="flex justify-between items-center cursor-pointer mb-4 sm:cursor-default"
+          onClick={() => {
+            if (window.innerWidth <= 640) setIsSettingsExpanded(!isSettingsExpanded);
+          }}
+        >
+          <h3 style={{ marginBottom: 0 }}>⚙️ 맞춤형 추천도(가점/감점) 및 필터 설정</h3>
+          <button className="sm:hidden p-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center">
+            {isSettingsExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+        </div>
+        
+        <div className={`${isSettingsExpanded ? 'flex flex-col gap-3' : 'hidden'} sm:block transition-all`}>
         
         <div className="option-row">
           <label className="title">🖥️ 화면 표시 레이아웃</label>
@@ -131,7 +151,7 @@ const Bottom: React.FC = () => {
               <label className="title flex items-center gap-1.5 mb-0">
                 <UserCheck size={14} className="text-emerald-500" /> 우선순위 배점 설정
               </label>
-              <label className="flex items-center gap-1.5 cursor-pointer text-[14px] text-gray-600 dark:text-gray-300">
+              <label className="flex items-center gap-1.5 cursor-pointer text-[14px] text-gray-600 dark:text-gray-300 whitespace-nowrap shrink-0">
                 <input 
                   type="checkbox" 
                   checked={settings.useProfWeight}
@@ -155,8 +175,10 @@ const Bottom: React.FC = () => {
                  * 각 순위의 배점을 설정하세요. (우측에 해당 강의들이 표시됩니다)
                </p>
                
-               {(settings.profWeights || []).map((pw, idx) => (
-                 <div key={idx} className="flex items-center flex-wrap gap-2 bg-white dark:bg-gray-700/30 p-2.5 rounded-lg border border-gray-100 dark:border-gray-600 shadow-sm">
+               <div className="w-full overflow-x-auto hide-scrollbar pb-2">
+                 <div className="flex flex-col gap-2 w-max min-w-full">
+                   {(settings.profWeights || []).map((pw, idx) => (
+                     <div key={idx} className="flex items-center flex-nowrap gap-2 bg-white dark:bg-gray-700/30 p-2.5 rounded-lg border border-gray-100 dark:border-gray-600 shadow-sm">
                     
                     {/* 1. 순위 배지 */}
                     <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 ${idx === 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-600 dark:text-gray-300'}`}>
@@ -167,7 +189,7 @@ const Bottom: React.FC = () => {
                     <div className="flex items-center gap-1 shrink-0">
                       <input 
                         type="number"
-                        className="w-[60px] h-6 px-0 text-right font-bold text-[13px] bg-transparent border-b border-gray-300 dark:border-gray-500 focus:border-emerald-500 outline-none transition-colors"
+                        className="!w-[40px] h-6 px-0 text-right font-bold text-[13px] bg-transparent border-b border-gray-300 dark:border-gray-500 focus:border-emerald-500 outline-none transition-colors"
                         value={pw?.weight || 0}
                         onChange={(e) => handleProfChange(idx, 'weight', e.target.value)}
                       />
@@ -203,8 +225,11 @@ const Bottom: React.FC = () => {
                     )}
                  </div>
                ))}
+                 </div>
+               </div>
             </div>
           )}
+        </div>
         </div>
         
         <div className="main-btns">
@@ -224,7 +249,7 @@ const Bottom: React.FC = () => {
             📊 생성된 시간표 ({schedules.length}개)
           </h3>
 
-          <div className="grid py-4 animate-in fade-in slide-in-from-top-4 duration-500" style={{ gridTemplateColumns: `repeat(${settings.cols}, 1fr)`, gap: '1rem' }}>
+          <div className="grid py-4 animate-in fade-in slide-in-from-top-4 duration-500 timetable-grid" style={{ '--dynamic-cols': settings.cols } as React.CSSProperties}>
             {schedules.length > 0 ? (
               schedules.map((s, sIdx) => (
                 <TimetableCard key={sIdx} schedule={s} index={sIdx} />
