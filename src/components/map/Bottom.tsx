@@ -103,15 +103,20 @@ const Bottom: React.FC = () => {
         <div className="option-row">
           <label className="title">💖 선호 공강 요일</label>
           <div>
-            {DAYS.map((day, idx) => (
-              <label key={idx} style={{ marginRight: '10px', cursor: 'pointer', fontSize: '14px' }}>
-                <input type="checkbox" checked={settings.prefDays[idx]} onChange={() => {
-                  const next = [...settings.prefDays];
-                  next[idx] = !next[idx];
-                  updateSettings({ prefDays: next });
-                }} /> {day}
-              </label>
-            ))}
+            <div className="flex gap-3 mb-2">
+              {DAYS.map((day, idx) => (
+                <label key={idx} style={{ cursor: 'pointer', fontSize: '14px' }}>
+                  <input type="checkbox" checked={settings.prefDays[idx]} onChange={() => {
+                    const next = [...settings.prefDays];
+                    next[idx] = !next[idx];
+                    updateSettings({ prefDays: next });
+                  }} /> {day}
+                </label>
+              ))}
+            </div>
+            <label className="flex items-center gap-1.5 cursor-pointer text-[14px] font-bold text-red-500">
+              <input type="checkbox" checked={settings.maximizeDaysOff} onChange={(e) => updateSettings({ maximizeDaysOff: e.target.checked })} /> 🔥 무조건 최대 공강 확보 (연강 감점 무시)
+            </label>
           </div>
         </div>
 
@@ -230,6 +235,21 @@ const Bottom: React.FC = () => {
             </div>
           )}
         </div>
+
+        <div className="option-row">
+          <label className="title">🤖 AI 맞춤 시간표 추천</label>
+          <div className="flex gap-4 items-center">
+            <select 
+              value={settings.aiRecommendMode || 'none'} 
+              onChange={(e) => updateSettings({ aiRecommendMode: e.target.value as any })}
+              style={{ padding: '4px 8px', border: '1px solid var(--border)', borderRadius: '4px', background: 'var(--bg-input)', color: 'var(--text-dark)', cursor: 'pointer' }}
+            >
+              <option value="none">사용 안 함</option>
+              <option value="v1">버전 1 (단일 최고 점수 추천)</option>
+              <option value="v2">버전 2 (테마별 추천)</option>
+            </select>
+          </div>
+        </div>
         </div>
         
         <div className="main-btns">
@@ -245,8 +265,69 @@ const Bottom: React.FC = () => {
       {/* 결과 영역: 항상 표시 */}
       {hasRun && (
         <div className="mt-8 transition-all duration-500 ease-in-out">
-          <h3 className="text-xl font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2">
-            📊 생성된 시간표 ({schedules.length}개)
+          
+          {settings.aiRecommendMode && settings.aiRecommendMode !== 'none' && schedules.length > 0 && (
+            <div className="mb-8 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+              <h3 className="text-xl font-bold text-indigo-700 dark:text-indigo-400 mb-4 flex items-center gap-2">
+                🤖 AI 맞춤 추천 시간표
+              </h3>
+              {settings.aiRecommendMode === 'v1' && (
+                <div className="grid animate-in fade-in slide-in-from-top-4 duration-500 timetable-grid" style={{ '--dynamic-cols': settings.cols } as React.CSSProperties}>
+                  <TimetableCard schedule={schedules[0]} index={0} />
+                </div>
+              )}
+              {settings.aiRecommendMode === 'v2' && (
+                <div className="flex flex-col gap-6">
+                  {(() => {
+                     const getDaysOffCount = (schedule: any) => {
+                       const daysWithClass = new Set();
+                       schedule.lectures.forEach((l: any) => l.timeBlocks.forEach((tb: any) => daysWithClass.add(tb.day)));
+                       return 5 - daysWithClass.size;
+                     };
+                     
+                     const bestDaysOff = [...schedules].sort((a, b) => getDaysOffCount(b) - getDaysOffCount(a) || b.score - a.score)[0];
+                     
+                     const bestBalance = [...schedules]
+                       .filter(s => s !== bestDaysOff)
+                       .sort((a, b) => {
+                          const penaltyA = (a.scoreText.match(/(-[0-9]+)/g) || []).reduce((acc, v) => acc + parseInt(v), 0);
+                          const penaltyB = (b.scoreText.match(/(-[0-9]+)/g) || []).reduce((acc, v) => acc + parseInt(v), 0);
+                          return penaltyB - penaltyA;
+                       })[0] || schedules[1];
+                       
+                     const bestLunch = [...schedules]
+                       .filter(s => s !== bestDaysOff && s !== bestBalance)
+                       .filter(s => s.scoreText.includes('쉬는시간'))
+                       .sort((a, b) => b.score - a.score)[0];
+                       
+                     return (
+                       <div className="grid py-4 animate-in fade-in slide-in-from-top-4 duration-500 timetable-grid" style={{ '--dynamic-cols': settings.cols } as React.CSSProperties}>
+                         <div className="relative pt-4">
+                           <div className="absolute top-0 left-4 bg-yellow-400 text-yellow-900 text-[11px] font-bold px-3 py-1 rounded-full z-10 shadow-sm border border-yellow-300">🏆 뒹굴뒹굴 (최대 공강)</div>
+                           <TimetableCard schedule={bestDaysOff} index={schedules.indexOf(bestDaysOff)} />
+                         </div>
+                         {bestBalance && (
+                           <div className="relative pt-4">
+                             <div className="absolute top-0 left-4 bg-emerald-400 text-emerald-900 text-[11px] font-bold px-3 py-1 rounded-full z-10 shadow-sm border border-emerald-300">⚖️ 황금 밸런스</div>
+                             <TimetableCard schedule={bestBalance} index={schedules.indexOf(bestBalance)} />
+                           </div>
+                         )}
+                         {bestLunch && (
+                           <div className="relative pt-4">
+                             <div className="absolute top-0 left-4 bg-orange-400 text-orange-900 text-[11px] font-bold px-3 py-1 rounded-full z-10 shadow-sm border border-orange-300">🍱 프로 밥러 (식사 보장)</div>
+                             <TimetableCard schedule={bestLunch} index={schedules.indexOf(bestLunch)} />
+                           </div>
+                         )}
+                       </div>
+                     );
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
+
+          <h3 className="text-xl font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2 mt-10">
+            📊 전체 생성된 시간표 ({schedules.length}개)
           </h3>
 
           <div className="grid py-4 animate-in fade-in slide-in-from-top-4 duration-500 timetable-grid" style={{ '--dynamic-cols': settings.cols } as React.CSSProperties}>

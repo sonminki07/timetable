@@ -121,12 +121,18 @@ export function calculateScore(
   for (const d of DAYS) {
     const dayIdx = DAYS.indexOf(d);
     if (dayCount[d] === 0) {
-      score += 15;
+      let addScore = 15;
       let dayText = `${d}공강(+15)`;
-      if (settings.prefDays[dayIdx]) {
-        score += 20;
+      
+      if (settings.maximizeDaysOff) {
+        addScore = 1000;
+        dayText = `${d} 최대공강(+1000)`;
+      } else if (settings.prefDays[dayIdx]) {
+        addScore = 35; // 15 + 20
         dayText = `${d} 선호공강(+35)`;
       }
+      
+      score += addScore;
       details.push(dayText);
     } else {
       // 중복 제거 후 정렬 (겹치는 수업이나 데이터 오류로 인한 중복 방지)

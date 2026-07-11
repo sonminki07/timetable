@@ -35,6 +35,7 @@ const defaultSettings: Settings = {
   hardDays: [false, false, false, false, false],
   excludePeriods: [1],
   prefDays: [false, false, false, false, false],
+  maximizeDaysOff: false,
   maxConsec: 3,
   consecPolicy: 'penalty',
   prefSubject: "",
@@ -48,6 +49,7 @@ const defaultSettings: Settings = {
     { name: "", weight: 20 },
   ],
   university: 'catholic', 
+  aiRecommendMode: 'none',
 };
 
 export const useTimetableStore = create<TimetableState>()(

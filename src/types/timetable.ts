@@ -38,6 +38,7 @@ export interface Settings {
   hardDays: boolean[];
   excludePeriods: number[];
   prefDays: boolean[];
+  maximizeDaysOff?: boolean;
   maxConsec: number;
   consecPolicy: 'penalty' | 'destroy';
   prefSubject: string;
@@ -45,6 +46,7 @@ export interface Settings {
   useProfWeight: boolean;
   profWeights: ProfWeight[];
   university?: 'catholic' | 'hanshin'; // 기본값: 'catholic'
+  aiRecommendMode?: 'none' | 'v1' | 'v2';
 }
 
 export interface Schedule {
