@@ -1,14 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTimetableStore } from '../../store/useTimetableStore';
 import { splitBulkText } from '../../utils/distributor';
+import { RefreshCw } from 'lucide-react';
 
 interface TopProps {
   onOpenSettings: () => void;
 }
 
+const formatVersion = (ts: string) => {
+  if (!ts) return 'v0.0.0';
+  const num = parseInt(ts);
+  if (isNaN(num)) return ts;
+  const date = new Date(num);
+  const yy = String(date.getFullYear()).slice(-2);
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `v${yy}.${mm}.${dd}-${hh}:${min}`;
+};
+
 const Top: React.FC<TopProps> = ({ onOpenSettings }) => {
   const { groups, addGroup, removeGroup, setBulkGroups, setAllTableMode, tableModeGroups, generate } = useTimetableStore();
   const [bulkInput, setBulkInput] = useState("");
+  
+  // 자동 업데이트 감지 상태
+  const [currentVersion, setCurrentVersion] = useState<string>('');
+  const [isLatest, setIsLatest] = useState<boolean>(true);
+
+  const fetchVersion = async () => {
+    try {
+      const res = await fetch('/version.json?t=' + Date.now());
+      const data = await res.json();
+      return data.version as string;
+    } catch (e) {
+      console.error('Failed to fetch version:', e);
+      return '';
+    }
+  };
+
+  useEffect(() => {
+    // 최초 버전 로드
+    fetchVersion().then(ver => {
+      if (ver) {
+        setCurrentVersion(ver);
+      }
+    });
+
+    const handleFocus = async () => {
+      if (document.visibilityState === 'visible') {
+        const serverVer = await fetchVersion();
+        if (serverVer && currentVersion && serverVer !== currentVersion) {
+          setIsLatest(false);
+          // 사용자 경험 향상을 위해 1초 후 자동 새로고침 진행
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleFocus);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleFocus);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [currentVersion]);
 
   const handleDistribute = () => {
     const texts = splitBulkText(bulkInput);
@@ -28,7 +87,21 @@ const Top: React.FC<TopProps> = ({ onOpenSettings }) => {
       <div className="header-wrapper">
         <div className="min-w-0 overflow-x-auto hide-scrollbar flex-1">
           <h1 className="whitespace-nowrap text-lg sm:text-2xl font-bold">🎓 시간표 제작기</h1>
-          <p className="desc whitespace-nowrap text-xs sm:text-sm"> <strong>[Premium]</strong> 모바일 & PC 시스템</p>
+          <div className="flex flex-col">
+            <p className="desc whitespace-nowrap text-xs sm:text-sm"> <strong>[Premium]</strong> 모바일 & PC 시스템</p>
+            {currentVersion && (
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mt-1">
+                <span className="font-semibold">{formatVersion(currentVersion)}</span>
+                {isLatest ? (
+                  <span className="text-emerald-500 dark:text-emerald-400 font-medium">최신 버전</span>
+                ) : (
+                  <span className="text-amber-500 dark:text-amber-400 font-bold flex items-center gap-1 animate-pulse">
+                    최신 아님 <RefreshCw size={10} className="animate-spin" />
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         <div className="header-right-tools shrink-0 ml-2">
           <button className="settings-btn shrink-0" onClick={onOpenSettings}>⚙️</button>
