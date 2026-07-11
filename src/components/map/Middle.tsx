@@ -19,7 +19,7 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MoveVertical } from 'lucide-react';
+import { MoveVertical, Maximize2, Minimize2 } from 'lucide-react';
 
 // 드래그 가능한 테이블 행 컴포넌트
 const SortableRow = ({ id, lecture, index, isExcluded, onToggleExclude }: any) => {
@@ -89,6 +89,7 @@ const Middle: React.FC = () => {
   } = useTimetableStore();
 
   const [isDraggingItem, setIsDraggingItem] = useState(false);
+  const [expandedGroupId, setExpandedGroupId] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -137,13 +138,16 @@ const Middle: React.FC = () => {
       <div id="groups-container">
         {groups.map((group) => {
           const isTable = tableModeGroups.has(group.id);
+          const isExpanded = expandedGroupId === group.id;
           const parsed = parseText(group.text, group.id, settings.university);
           // 각 항목에 고유 ID 부여 (인덱스 활용)
           const items = parsed.map((c, idx) => `item-${group.id}-${idx}`);
 
           return (
-            <div key={group.id} className="group" id={`group-box-${group.id}`}>
-              <div className="group-header flex-wrap gap-2">
+            <React.Fragment key={group.id}>
+              {isExpanded && <div className="fixed inset-0 bg-black/60 z-[9998]" onClick={() => setExpandedGroupId(null)}></div>}
+              <div className={`group ${isExpanded ? 'group-expanded-modal' : ''}`} id={`group-box-${group.id}`}>
+                <div className="group-header flex-wrap gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="whitespace-nowrap">그룹 {group.id} <span className="hidden sm:inline text-xs font-normal text-gray-400">(드래그하여 우선순위 변경)</span></h3>
                   <label className="flex items-center gap-1 cursor-pointer select-none whitespace-nowrap">
@@ -160,6 +164,15 @@ const Middle: React.FC = () => {
                   <button className="convert-btn" onClick={() => toggleTableMode(group.id)}>
                     {isTable ? "텍스트 수정" : "리스트 보기"}
                   </button>
+                  {isTable && (
+                    <button 
+                      className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+                      onClick={() => setExpandedGroupId(isExpanded ? null : group.id)}
+                      title={isExpanded ? "축소하기" : "크게 보기"}
+                    >
+                      {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                    </button>
+                  )}
                   <button className="reset-btn" onClick={() => updateGroupText(group.id, "")}>초기화</button>
                 </div>
               </div>
@@ -225,7 +238,8 @@ const Middle: React.FC = () => {
                   </div>
                 </DndContext>
               )}
-            </div>
+              </div>
+            </React.Fragment>
           );
         })}
       </div>

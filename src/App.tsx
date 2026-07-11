@@ -3,6 +3,8 @@ import Top from './components/map/Top';
 import Middle from './components/map/Middle';
 import Bottom from './components/map/Bottom';
 import Settings from './components/panel/Settings';
+import LZString from 'lz-string';
+import { useTimetableStore } from './store/useTimetableStore';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -11,6 +13,31 @@ const App: React.FC = () => {
   useEffect(() => {
     // 초기 로딩 애니메이션 상태 제어
     const timer = setTimeout(() => setIsLoaded(true), 150);
+    
+    // URL 데이터 파싱 및 복원
+    const params = new URLSearchParams(window.location.search);
+    const data = params.get('data');
+    if (data) {
+      try {
+        const decompressed = LZString.decompressFromEncodedURIComponent(data);
+        if (decompressed) {
+          const parsed = JSON.parse(decompressed);
+          if (parsed.groups || parsed.settings) {
+            useTimetableStore.setState((state) => ({
+              ...state,
+              groups: parsed.groups || state.groups,
+              settings: parsed.settings || state.settings,
+              hasRun: false
+            }));
+            // URL 정리 (새로고침 시 다시 덮어씌워지지 않도록)
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }
+      } catch(e) {
+        console.error("Failed to parse shared data:", e);
+      }
+    }
+    
     return () => clearTimeout(timer);
   }, []);
 
