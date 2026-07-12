@@ -52,6 +52,8 @@ const defaultSettings: Settings = {
   ],
   university: 'catholic', 
   aiRecommendMode: 'none',
+  maxGap: 3,
+  gapPolicy: 'penalty',
 };
 
 export const useTimetableStore = create<TimetableState>()(

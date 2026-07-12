@@ -52,7 +52,7 @@ export function getDistance(room1: string, room2: string): number | null {
 export function calculateScore(
   schedule: Lecture[],
   settings: Settings
-): { score: number; text: string; maxConsecutiveTotal: number } {
+): { score: number; text: string; maxConsecutiveTotal: number; maxGapTotal: number } {
   let score = 100;
   const details: string[] = [];
   const dayCount: Record<string, number> = { 월: 0, 화: 0, 수: 0, 목: 0, 금: 0 };
@@ -117,7 +117,8 @@ export function calculateScore(
     details.push("1교시(-30)");
   }
 
-  // 공강 가점 및 연강 계산
+  // 공강 가점 및 연강/공강 시간 계산
+  let maxGapTotal = 0;
   for (const d of DAYS) {
     const dayIdx = DAYS.indexOf(d);
     if (dayCount[d] === 0) {
@@ -137,6 +138,8 @@ export function calculateScore(
     } else {
       // 중복 제거 후 정렬 (겹치는 수업이나 데이터 오류로 인한 중복 방지)
       const hours = [...new Set(dayHours[d])].sort((a, b) => a - b);
+      
+      // 연강 계산
       let consecutive = 1;
       let maxConsecToday = 1; // 칸 수 (15분 단위)
       for (let i = 1; i < hours.length; i++) {
@@ -149,6 +152,16 @@ export function calculateScore(
       }
       maxConsecToday = Math.max(maxConsecToday, consecutive);
       maxConsecutiveTotal = Math.max(maxConsecutiveTotal, maxConsecToday);
+
+      // 공강 계산 (비어있는 최대 연속 블록 수)
+      let maxGapToday = 0;
+      for (let i = 1; i < hours.length; i++) {
+        const gap = hours[i] - hours[i - 1] - 1;
+        if (gap > maxGapToday) {
+          maxGapToday = gap;
+        }
+      }
+      maxGapTotal = Math.max(maxGapTotal, maxGapToday);
     }
   }
 
@@ -160,9 +173,20 @@ export function calculateScore(
     details.push(`${settings.maxConsec}연강(-${penalty})`);
   }
 
+  // 공강 제한 감점 (설정값은 시간 단위, maxGapTotal은 15분 단위)
+  const maxGapAllowedBlocks = (settings.maxGap ?? 3) * 4;
+  if (maxGapTotal > maxGapAllowedBlocks) {
+    const excessBlocks = maxGapTotal - maxGapAllowedBlocks;
+    const excessHours = excessBlocks / 4;
+    const penalty = Math.round(excessHours * 10);
+    score -= penalty;
+    details.push(`공강 초과(-${penalty})`);
+  }
+
   return {
     score,
     text: details.join(" | ") || "특이사항 없음",
     maxConsecutiveTotal,
+    maxGapTotal,
   };
 }

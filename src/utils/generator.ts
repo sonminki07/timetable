@@ -81,11 +81,15 @@ export function generateSchedules(
         }
       }
       if (hasHardDayOff) {
-        const { score, text, maxConsecutiveTotal } = calculateScore(currentLectures, settings);
+        const { score, text, maxConsecutiveTotal, maxGapTotal } = calculateScore(currentLectures, settings);
         
         // 🚀 연강 정책에 따른 필터링 (파괴 선택 시에만 제외)
         // 15분 단위(칸 수)로 비교
         if (settings.consecPolicy === 'destroy' && maxConsecutiveTotal >= settings.maxConsec * 4) return;
+
+        // 🚀 공강 정책에 따른 필터링 (파괴 선택 시에만 제외)
+        const maxGapAllowedBlocks = (settings.maxGap ?? 3) * 4;
+        if (settings.gapPolicy === 'destroy' && maxGapTotal > maxGapAllowedBlocks) return;
 
         // 🚀 이동 정보 미리 계산하여 렌더링 렉 방지
         const enrichedLectures = currentLectures.map(l => ({

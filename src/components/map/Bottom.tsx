@@ -137,6 +137,22 @@ const Bottom: React.FC = () => {
         </div>
 
         <div className="option-row">
+          <label className="title">⏰ 공강 제한 설정</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px' }}>
+            <input type="number" style={{ width: '40px' }} value={settings.maxGap === undefined ? 3 : settings.maxGap} onChange={(e) => updateSettings({ maxGap: parseInt(e.target.value) || 0 })} />
+            <span>시간 초과 공강</span>
+            <select 
+              value={settings.gapPolicy || 'penalty'} 
+              onChange={(e) => updateSettings({ gapPolicy: e.target.value as 'penalty' | 'destroy' })}
+              style={{ padding: '4px 8px', border: '1px solid var(--border)', borderRadius: '4px', background: 'var(--bg-input)', color: 'var(--text-dark)', cursor: 'pointer' }}
+            >
+              <option value="penalty">무자비 감점 (시간당 -10점)</option>
+              <option value="destroy">조합 파괴 (결과에서 제외)</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="option-row">
           <label className="title">❤️ 선호 수업 (가점)</label>
           <div><input type="text" style={{ width: '150px' }} value={settings.prefSubject} placeholder="예: 미디어 (+15점)" onChange={(e) => updateSettings({ prefSubject: e.target.value })} /></div>
         </div>

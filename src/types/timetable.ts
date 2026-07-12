@@ -47,6 +47,8 @@ export interface Settings {
   profWeights: ProfWeight[];
   university?: 'catholic' | 'hanshin'; // 기본값: 'catholic'
   aiRecommendMode?: 'none' | 'v1' | 'v2';
+  maxGap?: number; // 최대 공강 시간 (시간 단위)
+  gapPolicy?: 'penalty' | 'destroy'; // 공강 제한 정책
 }
 
 export interface Schedule {
