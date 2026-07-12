@@ -227,49 +227,71 @@ const Middle: React.FC = () => {
       </div>
 
       {/* 🚀 독립된 모달 오버레이 렌더링 (dnd-kit 버그 방지) */}
-      {expandedGroupId !== null && (() => {
-        const group = groups.find(g => g.id === expandedGroupId);
-        if (!group) return null;
-        
-        const parsed = parseText(group.text, group.id, settings.university);
-        const items = parsed.map((c, idx) => `item-${group.id}-${idx}`);
-
-        return (
-          <div className="group-modal-overlay animate-in fade-in duration-200" onClick={() => setExpandedGroupId(null)}>
-            <div className="group-modal-content animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-              <div className="group-header flex-wrap gap-2 mb-2 pb-3 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">그룹 {group.id} <span className="text-sm font-normal text-gray-400">(전체 화면 모드)</span></h3>
-                </div>
-                <div className="header-btns shrink-0 ml-auto">
-                  <button 
-                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
-                    onClick={() => setExpandedGroupId(null)}
-                    title="축소하기"
-                  >
-                    <Minimize2 size={20} />
-                  </button>
-                </div>
-              </div>
-              
-              {/* 모달 내부에서 동일한 DndContext 렌더링 */}
-              <GroupTable 
-                group={group} 
-                parsed={parsed} 
-                items={items} 
-                sensors={sensors}
-                setIsDraggingItem={setIsDraggingItem}
-                handleDragEnd={handleDragEnd}
-                excludedLectureKeys={excludedLectureKeys}
-                pinnedLectureKeys={pinnedLectureKeys}
-                toggleExcludeLecture={toggleExcludeLecture}
-                togglePinLecture={togglePinLecture}
-              />
-            </div>
-          </div>
-        );
-      })()}
+      {expandedGroupId !== null && (
+        <GroupModal
+          groupId={expandedGroupId}
+          groups={groups}
+          settings={settings}
+          sensors={sensors}
+          setIsDraggingItem={setIsDraggingItem}
+          handleDragEnd={handleDragEnd}
+          excludedLectureKeys={excludedLectureKeys}
+          pinnedLectureKeys={pinnedLectureKeys}
+          toggleExcludeLecture={toggleExcludeLecture}
+          togglePinLecture={togglePinLecture}
+          onClose={() => setExpandedGroupId(null)}
+        />
+      )}
     </>
+  );
+};
+
+// 🚀 전체화면 모달 컴포넌트 (IIFE 제거 및 안전한 마운트)
+const GroupModal = ({
+  groupId, groups, settings, sensors, setIsDraggingItem, handleDragEnd,
+  excludedLectureKeys, pinnedLectureKeys, toggleExcludeLecture, togglePinLecture, onClose
+}: any) => {
+  const group = groups.find((g: any) => g.id === groupId);
+  if (!group) return null;
+
+  const parsed = parseText(group.text, group.id, settings.university);
+  const items = parsed.map((c, idx) => `item-${group.id}-${idx}`);
+
+  return (
+    <div className="group-modal-overlay" onClick={onClose}>
+      <div className="group-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="group-header flex-wrap gap-2 mb-2 pb-3 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+              그룹 {group.id} <span className="text-sm font-normal text-gray-400">(전체 화면 모드)</span>
+            </h3>
+          </div>
+          <div className="header-btns shrink-0 ml-auto">
+            <button 
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+              onClick={onClose}
+              title="축소하기"
+            >
+              <Minimize2 size={20} />
+            </button>
+          </div>
+        </div>
+        
+        {/* 모달 내부에서 동일한 DndContext 렌더링 */}
+        <GroupTable 
+          group={group} 
+          parsed={parsed} 
+          items={items} 
+          sensors={sensors}
+          setIsDraggingItem={setIsDraggingItem}
+          handleDragEnd={handleDragEnd}
+          excludedLectureKeys={excludedLectureKeys}
+          pinnedLectureKeys={pinnedLectureKeys}
+          toggleExcludeLecture={toggleExcludeLecture}
+          togglePinLecture={togglePinLecture}
+        />
+      </div>
+    </div>
   );
 };
 
@@ -287,7 +309,7 @@ const GroupTable = ({
       onDragEnd={(e) => handleDragEnd(e, group.id)}
       onDragCancel={() => setIsDraggingItem(false)}
     >
-      <div className="group-table-container show animate-in fade-in duration-300 overflow-y-auto hide-scrollbar">
+      <div className="group-table-container show overflow-y-auto hide-scrollbar">
         <table className="group-table w-full whitespace-nowrap">
           <thead>
             <tr>
