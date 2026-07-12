@@ -188,6 +188,7 @@ export const useTimetableStore = create<TimetableState>()(
           ],
           settings: defaultSettings,
           excludedLectureKeys: new Set(),
+          pinnedLectureKeys: new Set(),
           schedules: [],
           overlapCounts: {},
           destroyedGroupId: null,
@@ -228,6 +229,7 @@ export const useTimetableStore = create<TimetableState>()(
             state: { 
               ...state, 
               excludedLectureKeys: new Set(state.excludedLectureKeys),
+              pinnedLectureKeys: new Set(state.pinnedLectureKeys || []),
               tableModeGroups: new Set(state.tableModeGroups || [])
             },
           };
@@ -238,7 +240,8 @@ export const useTimetableStore = create<TimetableState>()(
           const str = JSON.stringify({
             state: { 
               ...rest, 
-              excludedLectureKeys: Array.from(state.excludedLectureKeys),
+              excludedLectureKeys: Array.from(state.excludedLectureKeys || []),
+              pinnedLectureKeys: Array.from(state.pinnedLectureKeys || []),
               tableModeGroups: Array.from(state.tableModeGroups || [])
             },
           });
