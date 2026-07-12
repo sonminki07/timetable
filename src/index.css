@@ -106,43 +106,51 @@ p.desc { margin-top: 0; color: var(--text-gray); font-size: 14px; }
 
 .group-input { width: 100%; height: 100px; resize: vertical; border: 1px solid var(--border); border-radius: 5px; padding: 8px; font-size: 12px; line-height: 1.4; background: var(--bg-input); color: var(--text-dark); }
 
-/* 그룹 확장 모달 */
-.group-expanded-modal {
+/* 그룹 모달 오버레이 및 컨텐츠 */
+.group-modal-overlay {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90vw !important;
-  max-width: 1200px !important;
-  height: 85vh;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
   z-index: 9999;
-  margin: 0 !important;
-  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.group-modal-content {
+  width: 100%;
+  max-width: 1200px;
+  height: 85vh;
+  background: var(--bg-card);
+  border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  padding: 15px;
 }
 
-.group-expanded-modal .group-table-container {
+.group-modal-content .group-table-container {
   max-height: none;
   flex: 1;
 }
 
-.group-expanded-modal table.group-table th {
+.group-modal-content table.group-table th {
   padding: 12px 6px;
   font-size: 13px;
 }
 
-.group-expanded-modal table.group-table td {
+.group-modal-content table.group-table td {
   padding: 16px 6px;
   font-size: 13px;
 }
 
-.group-expanded-modal .drag-handle {
+.group-modal-content .drag-handle {
   width: 40px !important;
 }
 
-.group-expanded-modal .drag-handle svg {
+.group-modal-content .drag-handle svg {
   width: 24px;
   height: 24px;
 }

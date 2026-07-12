@@ -144,6 +144,65 @@ const Middle: React.FC = () => {
     }
   };
 
+  const renderTableContext = (group: any, parsed: any, items: string[]) => (
+    <DndContext 
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={() => setIsDraggingItem(true)}
+      onDragEnd={(e) => handleDragEnd(e, group.id)}
+      onDragCancel={() => setIsDraggingItem(false)}
+    >
+      <div className="group-table-container show animate-in fade-in duration-300 overflow-y-auto hide-scrollbar">
+        <table className="group-table w-full whitespace-nowrap">
+          <thead>
+            <tr>
+              <th style={{ width: '30px' }}></th>
+              <th style={{ width: '50px', textAlign: 'center' }}>순위</th>
+              <th style={{ width: '40px', textAlign: 'center' }}>제외</th>
+              <th className="min-w-[120px]">과목명</th>
+              <th style={{ width: '60px' }}>교수</th>
+              <th style={{ width: '80px' }}>시간</th>
+              <th style={{ width: '60px' }}>강의실</th>
+            </tr>
+          </thead>
+          <SortableContext 
+            items={items}
+            strategy={verticalListSortingStrategy}
+          >
+            <tbody>
+              {parsed.map((c: any, idx: number) => {
+                const key = `${group.id}|${c.title}|${c.prof}|${c.timesOnly}`;
+                const isExcluded = excludedLectureKeys.has(key);
+                const isPinned = pinnedLectureKeys.has(key);
+                const id = items[idx]; // Unique ID for Sortable
+
+                return (
+                  <SortableRow 
+                    key={id} 
+                    id={id} 
+                    lecture={c} 
+                    index={idx}
+                    isExcluded={isExcluded} 
+                    isPinned={isPinned}
+                    onToggleExclude={() => toggleExcludeLecture(key)} 
+                    onTogglePin={() => togglePinLecture(key)}
+                  />
+                );
+              })}
+              {parsed.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '20px', color: '#aaa' }}>
+                    강의 목록이 비어있습니다. 텍스트를 먼저 입력해주세요.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </SortableContext>
+        </table>
+      </div>
+    </DndContext>
+  );
+
   return (
     <>
       {/* 글로벌 토스트 메시지 (드래그 중일 때만 표시) */}
@@ -166,10 +225,8 @@ const Middle: React.FC = () => {
           const items = parsed.map((c, idx) => `item-${group.id}-${idx}`);
 
           return (
-            <React.Fragment key={group.id}>
-              {isExpanded && <div className="fixed inset-0 bg-black/60 z-[9998]" onClick={() => setExpandedGroupId(null)}></div>}
-              <div className={`group ${isExpanded ? 'group-expanded-modal' : ''}`} id={`group-box-${group.id}`}>
-                <div className="group-header flex-wrap gap-2">
+            <div key={group.id} className="group" id={`group-box-${group.id}`}>
+              <div className="group-header flex-wrap gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="whitespace-nowrap">그룹 {group.id} <span className="hidden sm:inline text-xs font-normal text-gray-400">(드래그하여 우선순위 변경)</span></h3>
                   <label className="flex items-center gap-1 cursor-pointer select-none whitespace-nowrap">
@@ -205,69 +262,50 @@ const Middle: React.FC = () => {
                   onChange={(e) => updateGroupText(group.id, e.target.value)} 
                   placeholder="에브리타임 장바구니 목록을 붙여넣으세요." 
                 />
+              ) : isExpanded ? (
+                <div className="flex items-center justify-center h-[120px] bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-blue-300 dark:border-blue-800 text-blue-500 font-bold text-sm">
+                  🔍 전체 화면에서 편집 중입니다...
+                </div>
               ) : (
-                <DndContext 
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={() => setIsDraggingItem(true)}
-                  onDragEnd={(e) => handleDragEnd(e, group.id)}
-                  onDragCancel={() => setIsDraggingItem(false)}
-                >
-                  <div className="group-table-container show animate-in fade-in duration-300 overflow-x-auto hide-scrollbar">
-                    <table className="group-table w-full whitespace-nowrap">
-                      <thead>
-                        <tr>
-                          <th style={{ width: '30px' }}></th>
-                          <th style={{ width: '50px', textAlign: 'center' }}>순위</th>
-                          <th style={{ width: '40px', textAlign: 'center' }}>제외</th>
-                          <th className="min-w-[120px]">과목명</th>
-                          <th style={{ width: '60px' }}>교수</th>
-                          <th style={{ width: '80px' }}>시간</th>
-                          <th style={{ width: '60px' }}>강의실</th>
-                        </tr>
-                      </thead>
-                      <SortableContext 
-                        items={items}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <tbody>
-                          {parsed.map((c, idx) => {
-                            const key = `${group.id}|${c.title}|${c.prof}|${c.timesOnly}`;
-                            const isExcluded = excludedLectureKeys.has(key);
-                            const isPinned = pinnedLectureKeys.has(key);
-                            const id = items[idx]; // Unique ID for Sortable
-
-                            return (
-                              <SortableRow 
-                                key={id} 
-                                id={id} 
-                                lecture={c} 
-                                index={idx}
-                                isExcluded={isExcluded} 
-                                isPinned={isPinned}
-                                onToggleExclude={() => toggleExcludeLecture(key)} 
-                                onTogglePin={() => togglePinLecture(key)}
-                              />
-                            );
-                          })}
-                          {parsed.length === 0 && (
-                            <tr>
-                              <td colSpan={7} style={{ textAlign: 'center', padding: '20px', color: '#aaa' }}>
-                                강의 목록이 비어있습니다. 텍스트를 먼저 입력해주세요.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </SortableContext>
-                    </table>
-                  </div>
-                </DndContext>
+                renderTableContext(group, parsed, items)
               )}
-              </div>
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
+
+      {/* 🚀 독립된 모달 오버레이 렌더링 (dnd-kit 버그 방지) */}
+      {expandedGroupId !== null && (() => {
+        const group = groups.find(g => g.id === expandedGroupId);
+        if (!group) return null;
+        
+        const parsed = parseText(group.text, group.id, settings.university);
+        const items = parsed.map((c, idx) => `item-${group.id}-${idx}`);
+
+        return (
+          <div className="group-modal-overlay animate-in fade-in duration-200" onClick={() => setExpandedGroupId(null)}>
+            <div className="group-modal-content animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+              <div className="group-header flex-wrap gap-2 mb-2 pb-3 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">그룹 {group.id} <span className="text-sm font-normal text-gray-400">(전체 화면 모드)</span></h3>
+                </div>
+                <div className="header-btns shrink-0 ml-auto">
+                  <button 
+                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+                    onClick={() => setExpandedGroupId(null)}
+                    title="축소하기"
+                  >
+                    <Minimize2 size={20} />
+                  </button>
+                </div>
+              </div>
+              
+              {/* 모달 내부에서 동일한 DndContext 렌더링 */}
+              {renderTableContext(group, parsed, items)}
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 };
