@@ -19,10 +19,10 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MoveVertical, Maximize2, Minimize2 } from 'lucide-react';
+import { MoveVertical, Maximize2, Minimize2, Pin } from 'lucide-react';
 
 // 드래그 가능한 테이블 행 컴포넌트
-const SortableRow = ({ id, lecture, index, isExcluded, onToggleExclude }: any) => {
+const SortableRow = ({ id, lecture, index, isExcluded, isPinned, onToggleExclude, onTogglePin }: any) => {
   const {
     attributes,
     listeners,
@@ -38,9 +38,9 @@ const SortableRow = ({ id, lecture, index, isExcluded, onToggleExclude }: any) =
     opacity: isDragging ? 0.95 : (isExcluded ? 0.4 : 1),
     zIndex: isDragging ? 9999 : 'auto',
     position: isDragging ? 'relative' : 'static',
-    backgroundColor: isDragging ? '#ffffff' : 'transparent',
+    backgroundColor: isDragging ? '#ffffff' : (isPinned ? '#f0f9ff' : 'transparent'),
     boxShadow: isDragging ? '0 15px 30px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.1)' : 'none',
-    outline: isDragging ? '2px solid #3b82f6' : 'none',
+    outline: isDragging ? '2px solid #3b82f6' : (isPinned ? '1px solid #bae6fd' : 'none'),
   } as React.CSSProperties;
 
   return (
@@ -52,27 +52,48 @@ const SortableRow = ({ id, lecture, index, isExcluded, onToggleExclude }: any) =
         {index + 1}순위
       </td>
       <td style={{ textAlign: 'center' }}>
-        <button 
-          onClick={() => onToggleExclude()} 
-          style={{ 
-            background: isExcluded ? '#27ae60' : '#e74c3c', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            cursor: 'pointer',
-            width: '24px',
-            height: '24px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {isExcluded ? '+' : '-'}
-        </button>
+        <div className="flex items-center justify-center gap-1">
+          <button 
+            onClick={() => onToggleExclude()} 
+            style={{ 
+              background: isExcluded ? '#27ae60' : '#e74c3c', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px', 
+              cursor: 'pointer',
+              width: '24px',
+              height: '24px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title={isExcluded ? "제외 취소" : "제외하기"}
+          >
+            {isExcluded ? '+' : '-'}
+          </button>
+          <button 
+            onClick={() => onTogglePin()} 
+            style={{ 
+              background: isPinned ? '#3b82f6' : '#e2e8f0', 
+              color: isPinned ? 'white' : '#64748b', 
+              border: 'none', 
+              borderRadius: '4px', 
+              cursor: 'pointer',
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title={isPinned ? "고정 해제" : "이 강의만 고정하기"}
+          >
+            <Pin size={14} className={isPinned ? "rotate-45" : ""} />
+          </button>
+        </div>
       </td>
-      <td style={{ textDecoration: isExcluded ? 'line-through' : 'none', fontWeight: '500' }}>{lecture.title}</td>
+      <td style={{ textDecoration: isExcluded ? 'line-through' : 'none', fontWeight: isPinned ? 'bold' : '500', color: isPinned ? '#0369a1' : 'inherit' }}>{lecture.title}</td>
       <td style={{ fontSize: '13px' }}>{lecture.prof}</td>
       <td style={{ fontSize: '12px' }}>{lecture.timesOnly}</td>
       <td className="room-col" style={{ fontSize: '12px' }}>{lecture.roomsOnly}</td>
@@ -84,6 +105,7 @@ const Middle: React.FC = () => {
   const { 
     groups, updateGroupText, reorderGroupText, 
     excludedLectureKeys, toggleExcludeLecture, 
+    pinnedLectureKeys, togglePinLecture,
     tableModeGroups, toggleTableMode, settings,
     toggleGroupRank
   } = useTimetableStore();
@@ -212,6 +234,7 @@ const Middle: React.FC = () => {
                           {parsed.map((c, idx) => {
                             const key = `${group.id}|${c.title}|${c.prof}|${c.timesOnly}`;
                             const isExcluded = excludedLectureKeys.has(key);
+                            const isPinned = pinnedLectureKeys.has(key);
                             const id = items[idx]; // Unique ID for Sortable
 
                             return (
@@ -221,7 +244,9 @@ const Middle: React.FC = () => {
                                 lecture={c} 
                                 index={idx}
                                 isExcluded={isExcluded} 
+                                isPinned={isPinned}
                                 onToggleExclude={() => toggleExcludeLecture(key)} 
+                                onTogglePin={() => togglePinLecture(key)}
                               />
                             );
                           })}

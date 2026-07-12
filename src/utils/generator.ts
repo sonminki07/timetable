@@ -5,7 +5,8 @@ import { DAYS } from "./parser";
 export function generateSchedules(
   groups: { id: number; courses: Lecture[] }[],
   settings: Settings,
-  excludedLectureKeys: Set<string>
+  excludedLectureKeys: Set<string>,
+  pinnedLectureKeys: Set<string> = new Set()
 ): { 
   schedules: Schedule[]; 
   overlapCounts: Record<string, number>;
@@ -15,10 +16,21 @@ export function generateSchedules(
   const validSchedules: Schedule[] = [];
   let destroyedGroupId: number | null = null;
 
-  // 각 그룹에서 제외된 강의 필터링
+  // 각 그룹에서 제외/고정된 강의 필터링
   const filteredGroups = groups.map((g) => {
+    // 1. 이 그룹에 속한 고정(Pinned) 강의 키 확인
+    const pinnedKeysInGroup = g.courses
+      .map(c => `${g.id}|${c.title}|${c.prof}|${c.timesOnly}`)
+      .filter(key => pinnedLectureKeys.has(key));
+    const hasPinInGroup = pinnedKeysInGroup.length > 0;
+
     const filteredCourses = g.courses.filter((c) => {
       const key = `${g.id}|${c.title}|${c.prof}|${c.timesOnly}`;
+      
+      // 2. 그룹 내에 고정된 강의가 있다면, 고정된 강의가 아닌 것은 무조건 제외
+      if (hasPinInGroup && !pinnedLectureKeys.has(key)) return false;
+
+      // 3. 사용자가 제외(Excluded) 처리한 강의는 무시
       if (excludedLectureKeys.has(key)) return false;
 
       // 특정 교시 제외 필터 (인덱스 기반)

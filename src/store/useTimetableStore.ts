@@ -8,6 +8,7 @@ interface TimetableState {
   groups: Group[];
   settings: Settings;
   excludedLectureKeys: Set<string>;
+  pinnedLectureKeys: Set<string>;
   schedules: Schedule[];
   overlapCounts: Record<string, number>;
   destroyedGroupId: number | null;
@@ -23,6 +24,7 @@ interface TimetableState {
   setBulkGroups: (texts: string[]) => void;
   updateSettings: (settings: Partial<Settings>) => void;
   toggleExcludeLecture: (key: string) => void;
+  togglePinLecture: (key: string) => void;
   generate: () => void;
   resetAll: () => void;
   setAllTableMode: (isTable: boolean) => void;
@@ -61,6 +63,7 @@ export const useTimetableStore = create<TimetableState>()(
       ],
       settings: defaultSettings,
       excludedLectureKeys: new Set<string>(),
+      pinnedLectureKeys: new Set<string>(),
       schedules: [],
       overlapCounts: {},
       destroyedGroupId: null,
@@ -139,8 +142,16 @@ export const useTimetableStore = create<TimetableState>()(
           return { excludedLectureKeys: newSet };
         }),
 
+      togglePinLecture: (key) =>
+        set((state) => {
+          const newSet = new Set(state.pinnedLectureKeys);
+          if (newSet.has(key)) newSet.delete(key);
+          else newSet.add(key);
+          return { pinnedLectureKeys: newSet };
+        }),
+
       generate: () => {
-        const { groups, settings, excludedLectureKeys } = get();
+        const { groups, settings, excludedLectureKeys, pinnedLectureKeys } = get();
         set({ isGenerating: true });
         
         setTimeout(() => {
@@ -156,7 +167,8 @@ export const useTimetableStore = create<TimetableState>()(
             const { schedules, overlapCounts, destroyedGroupId } = generateSchedules(
               parsedGroups,
               settings,
-              excludedLectureKeys
+              excludedLectureKeys,
+              pinnedLectureKeys
             );
 
             set({ schedules, overlapCounts, destroyedGroupId, hasRun: true, isGenerating: false });
