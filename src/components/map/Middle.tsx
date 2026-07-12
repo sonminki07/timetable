@@ -144,65 +144,6 @@ const Middle: React.FC = () => {
     }
   };
 
-  const renderTableContext = (group: any, parsed: any, items: string[]) => (
-    <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={() => setIsDraggingItem(true)}
-      onDragEnd={(e) => handleDragEnd(e, group.id)}
-      onDragCancel={() => setIsDraggingItem(false)}
-    >
-      <div className="group-table-container show animate-in fade-in duration-300 overflow-y-auto hide-scrollbar">
-        <table className="group-table w-full whitespace-nowrap">
-          <thead>
-            <tr>
-              <th style={{ width: '30px' }}></th>
-              <th style={{ width: '50px', textAlign: 'center' }}>순위</th>
-              <th style={{ width: '40px', textAlign: 'center' }}>제외</th>
-              <th className="min-w-[120px]">과목명</th>
-              <th style={{ width: '60px' }}>교수</th>
-              <th style={{ width: '80px' }}>시간</th>
-              <th style={{ width: '60px' }}>강의실</th>
-            </tr>
-          </thead>
-          <SortableContext 
-            items={items}
-            strategy={verticalListSortingStrategy}
-          >
-            <tbody>
-              {parsed.map((c: any, idx: number) => {
-                const key = `${group.id}|${c.title}|${c.prof}|${c.timesOnly}`;
-                const isExcluded = excludedLectureKeys.has(key);
-                const isPinned = pinnedLectureKeys.has(key);
-                const id = items[idx]; // Unique ID for Sortable
-
-                return (
-                  <SortableRow 
-                    key={id} 
-                    id={id} 
-                    lecture={c} 
-                    index={idx}
-                    isExcluded={isExcluded} 
-                    isPinned={isPinned}
-                    onToggleExclude={() => toggleExcludeLecture(key)} 
-                    onTogglePin={() => togglePinLecture(key)}
-                  />
-                );
-              })}
-              {parsed.length === 0 && (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '20px', color: '#aaa' }}>
-                    강의 목록이 비어있습니다. 텍스트를 먼저 입력해주세요.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </SortableContext>
-        </table>
-      </div>
-    </DndContext>
-  );
-
   return (
     <>
       {/* 글로벌 토스트 메시지 (드래그 중일 때만 표시) */}
@@ -267,7 +208,18 @@ const Middle: React.FC = () => {
                   🔍 전체 화면에서 편집 중입니다...
                 </div>
               ) : (
-                renderTableContext(group, parsed, items)
+                <GroupTable 
+                  group={group} 
+                  parsed={parsed} 
+                  items={items} 
+                  sensors={sensors}
+                  setIsDraggingItem={setIsDraggingItem}
+                  handleDragEnd={handleDragEnd}
+                  excludedLectureKeys={excludedLectureKeys}
+                  pinnedLectureKeys={pinnedLectureKeys}
+                  toggleExcludeLecture={toggleExcludeLecture}
+                  togglePinLecture={togglePinLecture}
+                />
               )}
             </div>
           );
@@ -301,12 +253,89 @@ const Middle: React.FC = () => {
               </div>
               
               {/* 모달 내부에서 동일한 DndContext 렌더링 */}
-              {renderTableContext(group, parsed, items)}
+              <GroupTable 
+                group={group} 
+                parsed={parsed} 
+                items={items} 
+                sensors={sensors}
+                setIsDraggingItem={setIsDraggingItem}
+                handleDragEnd={handleDragEnd}
+                excludedLectureKeys={excludedLectureKeys}
+                pinnedLectureKeys={pinnedLectureKeys}
+                toggleExcludeLecture={toggleExcludeLecture}
+                togglePinLecture={togglePinLecture}
+              />
             </div>
           </div>
         );
       })()}
     </>
+  );
+};
+
+// 헬퍼 컴포넌트 분리 (무한 루프 방지 및 고유 ID 부여)
+const GroupTable = ({ 
+  group, parsed, items, sensors, setIsDraggingItem, handleDragEnd, 
+  excludedLectureKeys, pinnedLectureKeys, toggleExcludeLecture, togglePinLecture 
+}: any) => {
+  return (
+    <DndContext 
+      id={`dnd-context-${group.id}`}
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={() => setIsDraggingItem(true)}
+      onDragEnd={(e) => handleDragEnd(e, group.id)}
+      onDragCancel={() => setIsDraggingItem(false)}
+    >
+      <div className="group-table-container show animate-in fade-in duration-300 overflow-y-auto hide-scrollbar">
+        <table className="group-table w-full whitespace-nowrap">
+          <thead>
+            <tr>
+              <th style={{ width: '30px' }}></th>
+              <th style={{ width: '50px', textAlign: 'center' }}>순위</th>
+              <th style={{ width: '40px', textAlign: 'center' }}>제외</th>
+              <th className="min-w-[120px]">과목명</th>
+              <th style={{ width: '60px' }}>교수</th>
+              <th style={{ width: '80px' }}>시간</th>
+              <th style={{ width: '60px' }}>강의실</th>
+            </tr>
+          </thead>
+          <SortableContext 
+            items={items}
+            strategy={verticalListSortingStrategy}
+          >
+            <tbody>
+              {parsed.map((c: any, idx: number) => {
+                const key = `${group.id}|${c.title}|${c.prof}|${c.timesOnly}`;
+                const isExcluded = excludedLectureKeys.has(key);
+                const isPinned = pinnedLectureKeys.has(key);
+                const id = items[idx];
+
+                return (
+                  <SortableRow 
+                    key={id} 
+                    id={id} 
+                    lecture={c} 
+                    index={idx}
+                    isExcluded={isExcluded} 
+                    isPinned={isPinned}
+                    onToggleExclude={() => toggleExcludeLecture(key)} 
+                    onTogglePin={() => togglePinLecture(key)}
+                  />
+                );
+              })}
+              {parsed.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '20px', color: '#aaa' }}>
+                    강의 목록이 비어있습니다. 텍스트를 먼저 입력해주세요.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </SortableContext>
+        </table>
+      </div>
+    </DndContext>
   );
 };
 
