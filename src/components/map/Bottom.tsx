@@ -4,7 +4,7 @@ import { DAYS } from '../../config/constants';
 import AnalysisBox from '../common/AnalysisBox';
 import TimetableCard from '../common/TimetableCard';
 import ExclusionSettings from './ExclusionSettings';
-import { ChevronDown, ChevronUp, ChevronRight, ChevronLeft, UserCheck } from 'lucide-react';
+import { ChevronDown, ChevronUp, UserCheck } from 'lucide-react';
 import { parseText } from '../../utils/parser';
 
 const Bottom: React.FC = () => {

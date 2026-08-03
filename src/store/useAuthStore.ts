@@ -56,11 +56,13 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // 로그아웃 시 세션(user)만 초기화, 쿠폰 이력 및 크레딧은 보존
+        // (OWASP: 세션 무효화 원칙 + UX: 로컬 데이터 연속성 보장)
         set({
           user: null,
           isLoggedIn: false,
           isPro: false,
-          credits: defaultCredits,
+          // credits, usedCouponCodes는 의도적으로 유지
         });
       },
 

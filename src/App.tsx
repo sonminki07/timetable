@@ -5,12 +5,16 @@ import Bottom from './components/map/Bottom';
 import Settings from './components/panel/Settings';
 import LZString from 'lz-string';
 import { useTimetableStore } from './store/useTimetableStore';
+import { useAuthStore } from './store/useAuthStore';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    // 앱 마운트 시 VIP 만료 여부 자동 검증 (Nielsen: Visibility of System Status)
+    useAuthStore.getState().checkVipStatus();
+
     // 초기 로딩 애니메이션 상태 제어
     const timer = setTimeout(() => setIsLoaded(true), 150);
     

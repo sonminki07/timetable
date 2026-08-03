@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, BookOpen, Sparkles, Sliders, Calendar, Share2, Award, Zap } from 'lucide-react';
+import { X, BookOpen } from 'lucide-react';
 
 interface UserGuideModalProps {
   isOpen: boolean;
