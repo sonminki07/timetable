@@ -3,11 +3,17 @@ import Top from './components/map/Top';
 import Middle from './components/map/Middle';
 import Bottom from './components/map/Bottom';
 import Settings from './components/panel/Settings';
+import LoginPage from './components/auth/LoginPage';
+import CouponPage from './components/coupon/CouponPage';
+import UserGuidePage from './components/guide/UserGuidePage';
 import LZString from 'lz-string';
 import { useTimetableStore } from './store/useTimetableStore';
 import { useAuthStore } from './store/useAuthStore';
 
+type PageType = 'main' | 'login' | 'coupon' | 'guide';
+
 const App: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState<PageType>('main');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -47,13 +53,42 @@ const App: React.FC = () => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  // ─── 1. 독립된 로그인 / 프로필 전용 페이지 ───
+  if (currentPage === 'login') {
+    return (
+      <LoginPage 
+        onBack={() => setCurrentPage('main')} 
+        onNavigateToCoupon={() => setCurrentPage('coupon')}
+      />
+    );
+  }
+
+  // ─── 2. 독립된 쿠폰 등록 전용 페이지 ───
+  if (currentPage === 'coupon') {
+    return (
+      <CouponPage 
+        onBack={() => setCurrentPage('main')} 
+      />
+    );
+  }
+
+  // ─── 3. 독립된 이용 가이드 전용 페이지 ───
+  if (currentPage === 'guide') {
+    return (
+      <UserGuidePage 
+        onBack={() => setCurrentPage('main')} 
+      />
+    );
+  }
+
+  // ─── 4. 메인 시간표 생성기 페이지 ───
   return (
     <div className={`main-container analog-fade ${isLoaded ? 'loaded' : ''}`}>
       {/* ⚙️ 사이드바 패널 */}
       <Settings isOpen={isSidebarOpen} onClose={toggleSidebar} />
       
-      {/* 🎓 헤더 및 그룹 컨트롤 */}
-      <Top onOpenSettings={toggleSidebar} />
+      {/* 🎓 헤더 및 그룹 컨트롤 (페이지 전환 함수 전달) */}
+      <Top onOpenSettings={toggleSidebar} onNavigate={(page) => setCurrentPage(page)} />
 
       {/* 📝 그룹 입력 영역 */}
       <Middle />
@@ -65,3 +100,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

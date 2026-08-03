@@ -9,6 +9,7 @@ import LoginModal from '../auth/LoginModal';
 
 interface TopProps {
   onOpenSettings: () => void;
+  onNavigate: (page: 'login' | 'coupon' | 'guide') => void;
 }
 
 const formatVersion = (ts: string) => {
@@ -24,15 +25,10 @@ const formatVersion = (ts: string) => {
   return `v${yy}.${mm}.${dd}-${hh}:${min}`;
 };
 
-const Top: React.FC<TopProps> = ({ onOpenSettings }) => {
+const Top: React.FC<TopProps> = ({ onOpenSettings, onNavigate }) => {
   const { groups, addGroup, removeGroup, setBulkGroups, setAllTableMode, tableModeGroups, generate } = useTimetableStore();
   const { user, isLoggedIn, isPro } = useAuthStore();
   const [bulkInput, setBulkInput] = useState("");
-  
-  // 모달 제어 상태
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [isCouponOpen, setIsCouponOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   // 자동 업데이트 감지 상태
   const [currentVersion, setCurrentVersion] = useState<string>('');
@@ -93,15 +89,6 @@ const Top: React.FC<TopProps> = ({ onOpenSettings }) => {
 
   return (
     <>
-      {/* 📖 이용 방법 가이드 모달 */}
-      <UserGuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
-      
-      {/* 🎟️ 쿠폰 등록 모달 */}
-      <CouponInputModal isOpen={isCouponOpen} onClose={() => setIsCouponOpen(false)} />
-
-      {/* 🔑 소셜 로그인 모달 */}
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-
       <div className="header-wrapper">
         <div className="min-w-0 overflow-x-auto hide-scrollbar flex-1">
           <div className="flex items-center gap-2">
@@ -132,25 +119,25 @@ const Top: React.FC<TopProps> = ({ onOpenSettings }) => {
         {/* 상단 툴바 버튼군 (가이드, 쿠폰, 로그인, 설정) */}
         <div className="header-right-tools shrink-0 ml-2 flex items-center gap-1.5">
           <button 
-            onClick={() => setIsGuideOpen(true)}
+            onClick={() => onNavigate('guide')}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 font-bold text-xs transition-all"
-            title="사용 설명서 보기"
+            title="사용 설명서 페이지로 이동"
           >
             <BookOpen size={15} /> <span className="hidden sm:inline">이용 가이드</span>
           </button>
 
           <button 
-            onClick={() => setIsCouponOpen(true)}
+            onClick={() => onNavigate('coupon')}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 text-amber-600 dark:text-amber-400 font-bold text-xs transition-all"
-            title="쿠폰 등록하기"
+            title="쿠폰 등록 페이지로 이동"
           >
             <Ticket size={15} /> <span className="hidden sm:inline">쿠폰 등록</span>
           </button>
 
           <button 
-            onClick={() => setIsLoginOpen(true)}
+            onClick={() => onNavigate('login')}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-xs transition-all"
-            title={isLoggedIn ? "프로필 보기" : "로그인하기"}
+            title={isLoggedIn ? "내 프로필 페이지로 이동" : "로그인 페이지로 이동"}
           >
             {isLoggedIn ? <User size={15} className="text-emerald-500" /> : <LogIn size={15} />}
             <span className="hidden sm:inline">{isLoggedIn ? user?.display_name : '로그인'}</span>
