@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShieldCheck, LogIn, LogOut, User, Sparkles, Crown, Ticket, Calendar, Mail, Clock, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, LogIn, LogOut, User, Sparkles, Crown, Ticket, Calendar, Mail, Clock, CheckCircle2, Zap } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
 interface LoginPageProps {
@@ -36,102 +36,102 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onNavigateToCoupon }) => 
     : 0;
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col transition-colors duration-200">
+    <div className="min-h-screen w-full bg-[var(--bg-main)] text-[var(--text-dark)] flex flex-col transition-colors duration-200">
       {/* 🔝 상단 네비게이션 헤더 */}
-      <header className="w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+      <header className="w-full bg-[var(--bg-card)] border-b border-[var(--border)] px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm backdrop-blur-md bg-opacity-90">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold text-sm transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--toss-sub-bg)] hover:bg-[var(--border)] text-[var(--text-dark)] font-bold text-sm transition-all active:scale-95 border border-[var(--border)]"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={18} className="text-[var(--toss-blue)]" />
           <span>시간표 제작기로 돌아가기</span>
         </button>
-        
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold">🎓 시간표 제작기</span>
-          <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold">
-            {isLoggedIn ? '내 계정' : '로그인'}
+
+        <div className="flex items-center gap-2.5">
+          <span className="text-lg font-black tracking-tight">🎓 시간표 제작기</span>
+          <span className="text-xs px-3 py-1 rounded-full bg-[var(--toss-blue-bg)] text-[var(--toss-blue)] font-extrabold flex items-center gap-1.5 border border-blue-200/30">
+            <User size={13} /> {isLoggedIn ? '내 프로필' : '로그인'}
           </span>
         </div>
       </header>
 
-      {/* 📄 독립된 메인 콘텐츠 영역 */}
-      <main className="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 flex flex-col items-center justify-center my-6">
+      {/* 📄 메인 콘텐츠 */}
+      <main className="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 flex flex-col items-center justify-center my-4">
         {isLoggedIn && user ? (
-          /* ─── 1. 로그인 상태: 프로필 & 계정 관리 전용 페이지 ─── */
-          <div className="w-full bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-xl flex flex-col gap-6 animate-in fade-in duration-300">
-            {/* 프로필 서두 */}
-            <div className="flex items-center gap-4 pb-6 border-b border-gray-100 dark:border-gray-700">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-500/20">
+          /* ─── 1. 로그인 완료 상태: 토스 스타일 프로필 & 계정 관리 카드 ─── */
+          <div className="toss-card w-full p-6 sm:p-8 flex flex-col gap-6 animate-in fade-in duration-300">
+            {/* 프로필 정보 */}
+            <div className="flex items-center gap-4 pb-6 border-b border-[var(--border)]">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-500/25 shrink-0">
                 {user.display_name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.display_name}</h2>
+                  <h2 className="text-xl font-black text-[var(--text-dark)]">{user.display_name}</h2>
                   {isPro && (
-                    <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500 text-white flex items-center gap-1 shadow-sm">
+                    <span className="text-xs font-extrabold px-3 py-0.5 rounded-full bg-amber-500 text-white flex items-center gap-1 shadow-sm">
                       <Crown size={12} /> PRO
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <div className="flex items-center gap-1.5 text-xs text-[var(--text-gray)] mt-1 font-medium">
                   <Mail size={13} />
                   {user.email}
                 </div>
               </div>
             </div>
 
-            {/* 멤버십 상태 카드 */}
+            {/* 멤버십 상태 정보 카드 */}
             <div className={`p-5 rounded-2xl border transition-all ${
               isPro 
-                ? 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/20 border-amber-200 dark:border-amber-800' 
-                : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700'
+                ? 'bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-300/40' 
+                : 'toss-sub-card border-[var(--border)]'
             }`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                  <Sparkles size={16} /> 현재 서비스 요금제
+                <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles size={16} /> 서비스 멤버십
                 </span>
                 {isPro && isVipActive && (
-                  <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-amber-500 text-white shadow-sm">
+                  <span className="text-xs font-black px-3 py-1 rounded-full bg-amber-500 text-white shadow-sm">
                     VIP D-{daysRemaining}
                   </span>
                 )}
               </div>
-              <p className="text-sm font-bold text-gray-900 dark:text-white">
-                {isPro ? '🎉 Pro / VIP 멤버십이 정상 활성화되어 있습니다.' : '기본 Free 요금제를 이용 중입니다.'}
+              <p className="text-sm font-extrabold text-[var(--text-dark)]">
+                {isPro ? '🎉 Pro / VIP 멤버십이 정상 적용되어 있습니다.' : '기본 Free 요금제를 이용 중입니다.'}
               </p>
             </div>
 
-            {/* 보유 혜택 리스트 */}
-            <div className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 flex flex-col gap-3">
-              <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Ticket size={14} /> 보유 혜택 현황
+            {/* 보유 혜택 현황 */}
+            <div className="toss-sub-card p-5 border border-[var(--border)] flex flex-col gap-3">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+                <Ticket size={14} /> 보유 혜택 및 크레딧
               </h3>
               
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center py-1 border-b border-gray-200/50 dark:border-gray-800">
-                  <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                    <Calendar size={15} className="text-blue-500" /> VIP 만료 일자
+                <div className="flex justify-between items-center py-1.5 border-b border-[var(--border)]">
+                  <span className="text-[var(--text-gray)] flex items-center gap-2 font-medium">
+                    <Calendar size={15} className="text-[var(--toss-blue)]" /> VIP 만료 일자
                   </span>
-                  <span className="font-bold text-gray-900 dark:text-white">
+                  <span className="font-bold text-[var(--text-dark)]">
                     {isVipActive ? formatDate(credits.vip_until) : '미적용 (쿠폰 등록 필요)'}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-1 border-b border-gray-200/50 dark:border-gray-800">
-                  <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                    <Sparkles size={15} className="text-purple-500" /> AI v2 추천 남은 횟수
+                <div className="flex justify-between items-center py-1.5 border-b border-[var(--border)]">
+                  <span className="text-[var(--text-gray)] flex items-center gap-2 font-medium">
+                    <Sparkles size={15} className="text-purple-500" /> AI v2 추천 잔여
                   </span>
-                  <span className="font-bold text-gray-900 dark:text-white">
+                  <span className="font-bold text-[var(--text-dark)]">
                     {isPro ? '무제한 (Pro)' : `${credits.ai_v2_count}회`}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                    <Clock size={15} className="text-emerald-500" /> PDF 내보내기 남은 횟수
+                <div className="flex justify-between items-center py-1.5">
+                  <span className="text-[var(--text-gray)] flex items-center gap-2 font-medium">
+                    <Clock size={15} className="text-emerald-500" /> PDF 내보내기 잔여
                   </span>
-                  <span className="font-bold text-gray-900 dark:text-white">
+                  <span className="font-bold text-[var(--text-dark)]">
                     {isPro ? '무제한 (Pro)' : `${credits.pdf_export_count}회`}
                   </span>
                 </div>
@@ -140,14 +140,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onNavigateToCoupon }) => 
               {onNavigateToCoupon && (
                 <button
                   onClick={onNavigateToCoupon}
-                  className="mt-2 w-full py-2.5 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold text-xs hover:bg-amber-200 transition-colors flex items-center justify-center gap-1.5"
+                  className="mt-2 w-full py-3 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-xs hover:bg-amber-200 transition-all flex items-center justify-center gap-1.5"
                 >
                   <Ticket size={14} /> 🎟️ 쿠폰 등록하러 가기
                 </button>
               )}
             </div>
 
-            {/* 로그아웃 버튼 */}
+            {/* 안전 로그아웃 버튼 */}
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
@@ -157,48 +157,59 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onNavigateToCoupon }) => 
               {isLoggingOut ? '로그아웃 처리 중...' : '안전하게 로그아웃'}
             </button>
 
-            <p className="text-xs text-center text-gray-400 dark:text-gray-500">
-              로그아웃하셔도 기존에 작성한 시간표 데이터는 브라우저에 안전하게 보존됩니다.
+            <p className="text-xs text-center text-[var(--text-muted)]">
+              로그아웃하셔도 작성하신 시간표 데이터는 브라우저에 보존됩니다.
             </p>
           </div>
         ) : (
-          /* ─── 2. 미로그인 상태: 소셜 로그인 전용 페이지 ─── */
-          <div className="w-full bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-xl flex flex-col gap-6 animate-in fade-in duration-300">
-            {/* 타이틀 */}
+          /* ─── 2. 미로그인 상태: 소셜 로그인 전용 토스 스타일 카드 ─── */
+          <div className="toss-card w-full p-6 sm:p-8 flex flex-col gap-6 animate-in fade-in duration-300">
+            {/* 타이틀 영역 */}
             <div className="text-center flex flex-col items-center gap-2">
-              <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner mb-1">
-                <LogIn size={28} />
+              <div className="w-16 h-16 rounded-2xl bg-[var(--toss-blue-bg)] text-[var(--toss-blue)] flex items-center justify-center shadow-inner mb-1">
+                <LogIn size={32} />
               </div>
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white">소셜 로그인 / 회원가입</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                실명 인증 1인 1계정으로 내 시간표를 클라우드에 안전하게 보관하세요.
+              <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-dark)] tracking-tight">
+                소셜 로그인 / 회원가입
+              </h2>
+              <p className="text-xs sm:text-sm text-[var(--text-gray)]">
+                실명 인증 1인 1계정으로 내 시간표를 안전하게 관리하세요.
               </p>
             </div>
 
-            {/* 보안 안내 */}
-            <div className="flex items-center gap-2.5 text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800">
-              <ShieldCheck size={20} className="shrink-0" />
-              <span>실명 인증된 카카오/구글 계정 1개당 단 1개의 프로필이 생성됩니다.</span>
+            {/* 보안 안내 뱃지 */}
+            <div className="flex items-center gap-3 text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl border border-emerald-200/80 dark:border-emerald-800">
+              <ShieldCheck size={22} className="shrink-0 text-emerald-500" />
+              <span className="font-semibold">실명 인증된 카카오/구글 계정 1개당 단 1개의 프로필이 생성됩니다.</span>
             </div>
 
-            {/* 회원 혜택 카드 */}
-            <div className="bg-blue-50/60 dark:bg-blue-950/30 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/40">
-              <h3 className="text-xs font-bold text-blue-800 dark:text-blue-300 mb-2.5 flex items-center gap-1.5">
-                <CheckCircle2 size={14} /> 회원 전용 혜택
+            {/* 회원 혜택 리스트 */}
+            <div className="toss-sub-card p-5 border border-[var(--border)]">
+              <h3 className="text-xs font-bold text-[var(--text-blue)] mb-3 flex items-center gap-1.5 uppercase tracking-wider">
+                <Zap size={14} /> 회원 전용 혜택
               </h3>
-              <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1.5">
-                <li>• 나만의 시간표 무제한 클라우드 저장 & 다중 기기 동기화</li>
-                <li>• 🎟️ 이벤트 프로모션 쿠폰 등록 및 VIP 체험권 이용</li>
-                <li>• AI 테마별 맞춤 추천 시간표 기능 이용</li>
+              <ul className="text-xs sm:text-sm text-[var(--text-gray)] space-y-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-[var(--toss-blue)]" />
+                  <span>나만의 시간표 클라우드 안전 저장 & 동기화</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-[var(--toss-blue)]" />
+                  <span>🎟️ 프로모션 쿠폰 등록 및 VIP 체험권 이용</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-[var(--toss-blue)]" />
+                  <span>AI 테마별 맞춤 추천 시간표 기능 이용</span>
+                </li>
               </ul>
             </div>
 
-            {/* 소셜 로그인 버튼 */}
+            {/* 소셜 로그인 버튼 세트 */}
             <div className="flex flex-col gap-3.5 pt-2">
               {/* 카카오 로그인 */}
               <button
                 onClick={() => handleLogin('kakao')}
-                className="w-full py-4 px-5 rounded-2xl bg-[#FEE500] text-[#191919] font-bold text-base flex items-center justify-center gap-3 hover:bg-[#FADA00] active:scale-[0.98] transition-all shadow-md"
+                className="w-full py-4 px-5 rounded-2xl bg-[#FEE500] text-[#191919] font-extrabold text-base flex items-center justify-center gap-3 hover:bg-[#FADA00] active:scale-[0.98] transition-all shadow-md"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.707 4.8 4.27 6.054-.188.702-.682 2.545-.78 2.94-.122.492.18.486.38.354.157-.104 2.502-1.7 3.516-2.39.52.077 1.058.117 1.614.117 4.97 0 9-3.186 9-7.116C21 6.185 16.97 3 12 3z"/>
@@ -209,7 +220,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onNavigateToCoupon }) => 
               {/* 구글 로그인 */}
               <button
                 onClick={() => handleLogin('google')}
-                className="w-full py-4 px-5 rounded-2xl bg-white dark:bg-gray-700 text-gray-800 dark:text-white font-bold text-base flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 active:scale-[0.98] transition-all shadow-md"
+                className="w-full py-4 px-5 rounded-2xl bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-extrabold text-base flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98] transition-all shadow-md"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -221,8 +232,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onNavigateToCoupon }) => 
               </button>
             </div>
 
-            <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-2">
-              로그인 없이 비회원으로도 모든 시간표 생성 기능을 자유롭게 이용하실 수 있습니다.
+            <p className="text-xs text-center text-[var(--text-muted)] mt-2">
+              비회원 상태에서도 시간표 기능은 제한 없이 100% 무료로 사용하실 수 있습니다.
             </p>
           </div>
         )}
