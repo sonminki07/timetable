@@ -214,7 +214,7 @@ const Bottom: React.FC = () => {
                         value={pw?.weight || 0}
                         onChange={(e) => handleProfChange(idx, 'weight', e.target.value)}
                       />
-                      <span className="text-[11px] text-gray-400">점ㅤㅤ</span>
+                      <span className="text-[11px] text-gray-400 ml-1">점</span>
                     </div>
 
                     {/* 3. 구분선 (선택) */}
@@ -236,7 +236,7 @@ const Bottom: React.FC = () => {
 
                       return (
                         <div key={g.id} className="flex items-center gap-1 bg-gray-50 dark:bg-gray-600/50 px-2 py-1 rounded border border-gray-100 dark:border-gray-500/30 text-[13px] text-gray-700 dark:text-gray-200 shrink-0 min-w-[80px]" title={course.title}>
-                          <span className="font-bold text-gray-400 text-[11px]">ㅤG{g.id}</span>
+                          <span className="font-bold text-gray-400 text-[11px]">G{g.id}</span>
                           <span className="font-medium">{course.prof}</span>
                         </div>
                       );

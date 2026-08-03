@@ -6,12 +6,12 @@ export function splitBulkText(text: string): string[] {
   if (!trimmedText) return [];
 
   // 정규식 내 줄바꿈 오류 수정
-  const groupMarkerRegex = /(?:^|\n)그룹\s*\d+/g;
+  const groupMarkerRegex = /(?:^|\n)그룹\s*\d+/;
   let groupData: string[] = [];
 
   if (groupMarkerRegex.test(trimmedText)) {
     groupData = trimmedText
-      .split(groupMarkerRegex)
+      .split(/(?:^|\n)그룹\s*\d+/)
       .map((item) => item.trim())
       .filter((item) => item.length > 0);
   } else {
